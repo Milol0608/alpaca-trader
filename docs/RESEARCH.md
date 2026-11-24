@@ -133,3 +133,16 @@ Data: 43,900 settled weather markets (eve) and 44,000 (am). Train: Sep 2025 – 
 - **Pass bar:** conservative-fill P&L > 0 on the test period with a 95% bootstrap CI (over city-days) above zero,
   **and** positive in the later half (Jul–Nov 2026) on its own, since K1 hinted the bias is shrinking. Passing earns a
   shadow slot only after owner approval. It doesn't earn real money.
+
+---
+
+## R3. Intraday SPY momentum (Gao, Han, Li & Zhou 2018). Registered 2026-11-24, before running
+- **Hypothesis:** SPY's return from the previous close to 10:00 New York time predicts its last half hour
+  (15:30–16:00) the same day. Long-only version: on days the first-half-hour return is positive, buy SPY at 15:30
+  and sell at the 16:00 close.
+- **Variant R3b:** on negative days, buy SH (1x inverse) for the last half hour instead.
+- **Data:** SIP 30-minute bars for SPY and SH, regular session only, Jan 2016 – Nov 2026. 5 bps per side, so about
+  10 bps per round trip.
+- **Pass bar:** average return per trade > 0 after costs, with a 95% CI above zero, in both the full period and the
+  held-out window (2023+). It also has to be worth the time out of the market: its Sharpe must beat SPY's. If it
+  trades about 250 times a year for tiny gains, report that plainly.
