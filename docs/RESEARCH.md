@@ -270,3 +270,36 @@ Held-out 2023+: R4a $200 → $658, Sharpe 1.47, worst drop 25% (IWM: $320, Sharp
 - **Pass bar:** at 25 bps, 2017-03 to now, Sharpe above SPY's, worst drop under 35%, final above SPY's, and not
   losing to SPY in the held-out window from 2023. Daily returns use every calendar day (crypto trades 7 days),
   annualised with 365.
+
+## R5 result: large-cap insider buys: **FAIL**
+Run with `uv run python -m trader.backtest.insider_v2`: 3,328 signal days in 542 stocks, 22× turnover a year.
+
+| | $200 → full | Sharpe | worst drop | held-out $ | held-out Sharpe |
+|---|---|---|---|---|---|
+| SPY | $699 | 0.80 | 34% | $398 | 1.23 |
+| R5 at 10 bps | $463 | 0.47 | 50% | $466 | 1.16 |
+| R5 at 30 bps | $294 | 0.28 | 52% | $397 | 0.97 |
+
+- It fails every part of the bar on the full period. 2022 was −36% against SPY's −18%.
+- The held-out years look fine on dollars ($466 vs $398) but not on risk-adjusted return (1.16 vs 1.23).
+- Together with R4: insider buying only pays in small caps, and there costs eat it. **Close the insider line.**
+
+## C1 result: crypto slow trend, BTC + ETH: **FAIL**
+Run with `uv run python -m trader.backtest.crypto_trend` (Coinbase daily candles, 2016-06 to 2026-11).
+
+| | $200 → full | CAGR | Sharpe | worst drop | held-out $ | held-out Sharpe | held-out worst drop |
+|---|---|---|---|---|---|---|---|
+| SPY | $698 | 13.7% | 0.80 | 34% | $398 | 1.23 | 19% |
+| BTC buy-and-hold | $9,950 | 49.4% | 0.93 | 84% | $737 | 0.95 | 53% |
+| BTC + ETH 50/50, no filter | $21,855 | 62.0% | 1.02 | 88% | $481 | 0.69 | 60% |
+| **C1 trend, 25 bps** | $45,466 | 74.7% | 1.28 | **61%** | **$356** | **0.59** | 40% |
+| C1 trend, 50 bps | $40,616 | 72.6% | 1.26 | 62% | $339 | 0.55 | 40% |
+
+- The filter does what trend filters do: it cuts the worst drop from 84–88% to 61% and raises the full-period
+  Sharpe. But 61% is far over the 35% limit.
+- The big full-period numbers come mostly from the 2017 run-up, and they don't repeat. Since 2023 the filter
+  **lost to SPY** and to plain BTC: whipsaws in sideways markets cost more than the crashes it dodged.
+- Fees barely matter (25 vs 50 bps), because it trades about weekly at most.
+- **Verdict:** fail. Crypto as a slow trend overlay doesn't meet the owner's 35% drop limit at any setting tested.
+  A 10–20% crypto sleeve inside a stock portfolio would be a different, portfolio-level question and isn't
+  registered.

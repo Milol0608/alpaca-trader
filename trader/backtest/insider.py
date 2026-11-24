@@ -48,7 +48,7 @@ def signals(daily: pl.DataFrame) -> dict[str, pl.DataFrame]:
     return {"R4a any officer/director buy": a, "R4b cluster (2+ insiders, 5d)": a.filter(pl.col("cluster") >= 2)}
 
 
-def insider_strategy(sig: pl.DataFrame):
+def insider_strategy(sig: pl.DataFrame, hold: int = HOLD, max_names: int = MAX_NAMES):
     by_day: dict[date, list[tuple[str, float]]] = {}
     for sym, filed, value in sig.select("symbol", "filed", "value").iter_rows():
         by_day.setdefault(filed, []).append((sym, value))
@@ -68,7 +68,7 @@ def insider_strategy(sig: pl.DataFrame):
         changed = False
         for s in list(held):
             n, v = held[s]
-            if n + 1 >= HOLD:
+            if n + 1 >= hold:
                 del held[s]
                 changed = True
             else:
@@ -78,8 +78,8 @@ def insider_strategy(sig: pl.DataFrame):
                 if s not in held:
                     changed = True
                 held[s] = (0, v)  # a fresh purchase restarts the holding clock
-        if len(held) > MAX_NAMES:
-            keep = sorted(held.items(), key=lambda kv: (kv[1][0], -kv[1][1]))[:MAX_NAMES]
+        if len(held) > max_names:
+            keep = sorted(held.items(), key=lambda kv: (kv[1][0], -kv[1][1]))[:max_names]
             held.clear()
             held.update(dict(keep))
         if not changed:
