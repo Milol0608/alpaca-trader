@@ -12,6 +12,8 @@ so they aren't tuned to this history. Each one is a research candidate, not a re
 
 from __future__ import annotations
 
+from datetime import date
+
 import numpy as np
 
 from trader.backtest.engine import Window
@@ -23,6 +25,14 @@ def _first_day_of_month(w: Window) -> bool:
 
 def _first_day_of_week(w: Window) -> bool:
     return len(w.days) < 2 or w.days[-1].isocalendar()[1] != w.days[-2].isocalendar()[1]
+
+
+def _due(w: Window, every: str, force: bool, also_on: date | None) -> bool:
+    """Rebalance on schedule; `force` decides every time (live: the paper runner decides when);
+    `also_on` adds one extra decision day (forward tracking starts invested, not in cash)."""
+    if force or (also_on is not None and w.today == also_on):
+        return True
+    return _first_day_of_month(w) if every == "month" else _first_day_of_week(w)
 
 
 def _cols(w: Window, symbols: set[str]) -> tuple[list[str], np.ndarray]:
@@ -39,15 +49,15 @@ def _top(names: list[str], score: np.ndarray, n: int, highest: bool) -> dict[str
     return {names_ok[k]: 1.0 / len(order) for k in order}
 
 
-def buy_hold(symbol: str):
+def buy_hold(symbol: str, *, force: bool = False, also_on: date | None = None):
     def strat(w: Window):
-        return {symbol: 1.0} if len(w.days) == 1 or _first_day_of_month(w) else None
+        return {symbol: 1.0} if len(w.days) == 1 or _due(w, "month", force, also_on) else None
     return strat
 
 
-def momentum(etfs: set[str], n: int = 20, lookback: int = 252, skip: int = 21):
+def momentum(etfs: set[str], n: int = 20, lookback: int = 252, skip: int = 21, *, force: bool = False, also_on: date | None = None):
     def strat(w: Window):
-        if not _first_day_of_month(w) or len(w.days) <= lookback:
+        if not _due(w, "month", force, also_on) or len(w.days) <= lookback:
             return None
         names, cols = _cols(w, w.allowed - etfs)
         c = w.close[:, cols]
@@ -56,9 +66,9 @@ def momentum(etfs: set[str], n: int = 20, lookback: int = 252, skip: int = 21):
     return strat
 
 
-def reversal(etfs: set[str], n: int = 20, lookback: int = 5):
+def reversal(etfs: set[str], n: int = 20, lookback: int = 5, *, force: bool = False, also_on: date | None = None):
     def strat(w: Window):
-        if not _first_day_of_week(w) or len(w.days) <= lookback:
+        if not _due(w, "week", force, also_on) or len(w.days) <= lookback:
             return None
         names, cols = _cols(w, w.allowed - etfs)
         c = w.close[:, cols]
@@ -66,9 +76,9 @@ def reversal(etfs: set[str], n: int = 20, lookback: int = 5):
     return strat
 
 
-def low_vol(etfs: set[str], n: int = 20, lookback: int = 60):
+def low_vol(etfs: set[str], n: int = 20, lookback: int = 60, *, force: bool = False, also_on: date | None = None):
     def strat(w: Window):
-        if not _first_day_of_month(w) or len(w.days) <= lookback:
+        if not _due(w, "month", force, also_on) or len(w.days) <= lookback:
             return None
         names, cols = _cols(w, w.allowed - etfs)
         c = w.close[-lookback - 1:, cols]
@@ -79,9 +89,9 @@ def low_vol(etfs: set[str], n: int = 20, lookback: int = 60):
     return strat
 
 
-def trend_etfs(etfs: set[str], lookback: int = 200):
+def trend_etfs(etfs: set[str], lookback: int = 200, *, force: bool = False, also_on: date | None = None):
     def strat(w: Window):
-        if not _first_day_of_month(w) or len(w.days) <= lookback:
+        if not _due(w, "month", force, also_on) or len(w.days) <= lookback:
             return None
         names, cols = _cols(w, w.allowed & etfs)
         c = w.close[-lookback:, cols]

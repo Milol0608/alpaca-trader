@@ -9,7 +9,12 @@ Shapes verified against Alpaca's API reference (2026-11-24):
   GET {trading}/v2/calendar   legacy calendar: [{date, open, close, session_open, session_close, ...}]
 Auth headers: APCA-API-KEY-ID, APCA-API-SECRET-KEY. Paper and live use different hosts and keys.
 
-Deliberately no order methods: placing orders arrives in its own milestone, behind the mode check.
+Orders (verified 2026-11-24): POST {trading}/v2/orders with symbol, side, type, time_in_force, and
+either qty (fractional only for market/day) or notional (market/day only); client_order_id <= 128 chars.
+A day order sent while the market is closed is queued for the next session. DELETE
+{trading}/v2/positions/{symbol} closes a whole position and returns the closing order.
+Orders are only allowed when the client is created with allow_orders=True, which only the paper
+runner does, and only after checking it's talking to the paper host.
 """
 
 from __future__ import annotations
@@ -56,7 +61,7 @@ class RateLimiter:
 class AlpacaClient:
     def __init__(self, trading_url: str, data_url: str, key_id: str, secret_key: str,
                  requests_per_minute: int = 180, transport: httpx.BaseTransport | None = None,
-                 sleep=time.sleep, max_retries: int = 5):
+                 sleep=time.sleep, max_retries: int = 5, allow_orders: bool = False):
         if not key_id or not secret_key:
             raise AlpacaError("Alpaca key id and secret are required (see .env.example)")
         headers = {"APCA-API-KEY-ID": key_id, "APCA-API-SECRET-KEY": secret_key}
@@ -65,6 +70,7 @@ class AlpacaClient:
         self.limiter = RateLimiter(requests_per_minute, sleep=sleep)
         self.sleep, self.max_retries = sleep, max_retries
         self.calls = 0
+        self.allow_orders = allow_orders
 
     def __enter__(self) -> AlpacaClient:
         return self
@@ -103,7 +109,51 @@ class AlpacaClient:
             return max(0.5, min(int(reset) - time.time() + 0.5, 60))
         return min(2 ** attempt, 30)
 
+    def _write(self, method: str, path: str, *, params: dict[str, Any] | None = None,
+               body: dict[str, Any] | None = None) -> Any:
+        """One write request. Retried only on 429 (the request was refused, so nothing happened).
+        Any other failure is raised: retrying an order blindly could place it twice, so the caller
+        checks by client_order_id instead."""
+        if not self.allow_orders:
+            raise AlpacaError("this client is read-only (allow_orders=False)")
+        for attempt in range(self.max_retries + 1):
+            self.limiter.wait()
+            r = self.trading.request(method, path, params=params, json=body)
+            self.calls += 1
+            if r.status_code == 429 and attempt < self.max_retries:
+                self.sleep(self._retry_after(r, attempt))
+                continue
+            if r.status_code >= 400:
+                raise AlpacaError(f"{method} {path} -> {r.status_code}: {r.text[:300]}")
+            return r.json() if r.content else None
+        raise AlpacaError(f"{method} {path}: rate-limited {self.max_retries} times")
+
+    def submit_order(self, *, symbol: str, side: str, client_order_id: str, notional: str | None = None,
+                     qty: str | None = None) -> dict[str, Any]:
+        if (notional is None) == (qty is None):
+            raise ValueError("give exactly one of notional or qty")
+        body: dict[str, Any] = {"symbol": symbol, "side": side, "type": "market", "time_in_force": "day",
+                                "client_order_id": client_order_id[:128]}
+        body["notional" if notional is not None else "qty"] = notional if notional is not None else qty
+        return self._write("POST", "/v2/orders", body=body)
+
+    def close_position(self, symbol: str) -> dict[str, Any]:
+        return self._write("DELETE", f"/v2/positions/{symbol}")
+
     # ---------------------------------------------------------------- trading API (read-only)
+
+    def clock(self) -> dict[str, Any]:
+        """Legacy clock: {timestamp, is_open, next_open, next_close}."""
+        return self._get(self.trading, "/v2/clock")
+
+    def positions(self) -> list[dict[str, Any]]:
+        return self._get(self.trading, "/v2/positions")
+
+    def orders(self, status: str = "all", after: str | None = None, limit: int = 500) -> list[dict[str, Any]]:
+        params: dict[str, Any] = {"status": status, "limit": limit, "direction": "desc"}
+        if after:
+            params["after"] = after
+        return self._get(self.trading, "/v2/orders", params)
 
     def account(self) -> dict[str, Any]:
         return self._get(self.trading, "/v2/account")
@@ -135,7 +185,7 @@ class AlpacaClient:
             params["page_token"] = token
 
 
-def client_from_settings(settings) -> AlpacaClient:
+def client_from_settings(settings, *, allow_orders: bool = False) -> AlpacaClient:
     key_id, secret = settings.credentials()
     return AlpacaClient(settings.trading_url, settings.alpaca_data_url, key_id, secret,
-                        requests_per_minute=settings.data_requests_per_minute)
+                        requests_per_minute=settings.data_requests_per_minute, allow_orders=allow_orders)
