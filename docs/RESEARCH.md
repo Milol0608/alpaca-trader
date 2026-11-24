@@ -146,3 +146,20 @@ Data: 43,900 settled weather markets (eve) and 44,000 (am). Train: Sep 2025 – 
 - **Pass bar:** average return per trade > 0 after costs, with a 95% CI above zero, in both the full period and the
   held-out window (2023+). It also has to be worth the time out of the market: its Sharpe must beat SPY's. If it
   trades about 250 times a year for tiny gains, report that plainly.
+
+## R3 result: intraday SPY momentum: **FAIL (no signal, even before costs)**
+2,738 sessions, Jan 2016 – Nov 2026.
+
+| rule | window | trades | bp/trade | 95% CI | CAGR | Sharpe |
+|---|---|---|---|---|---|---|
+| R3 net of 5 bp/side | full | 1,529 | −10.8 | [−12.1, −9.5] | −14.1% | −4.7 |
+| R3 before costs | full | 1,514 | −0.8 | [−2.0, +0.6] | −1.2% | −0.4 |
+| R3 before costs | held-out 2023+ | 563 | +0.2 | [−1.3, +1.9] | +0.3% | 0.1 |
+| R3b (+ SH on down days) | full | 2,661 | −10.4 | [−11.5, −9.3] | −22.5% | −5.3 |
+| SPY buy-and-hold | full | 2,733 days | | | 14.2% | 0.83 |
+
+- The first half hour's direction matched the last half hour's **48.2%** of the time (50% = coin flip).
+- 5 bp per side is harsher than SPY's real spread, but before costs the edge is about zero anyway, so cheaper costs
+  can't rescue it.
+- The published effect (Gao et al., 1993–2013) hasn't held in 2016–2026 SPY data.
+- **Verdict:** fail. Don't build it. Half-days put a few post-market 15:30 bars in the sample, too few to matter.
