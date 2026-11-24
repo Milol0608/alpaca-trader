@@ -183,3 +183,34 @@ Data: 43,900 settled weather markets (eve) and 44,000 (am). Train: Sep 2025 – 
     positions are realistic. 5 bps per side.
 - **Pass bar:** Sharpe above SPY's, worst drop under 35%, final value above SPY's, after costs, 2017–2026, and not
   losing to SPY in the held-out window from 2023. It must also beat plain momentum's final value, per the brief.
+
+## R4 result: insider purchases: **FAIL (worst drop 44%; the edge does not survive realistic costs)**
+Run with `uv run python -m trader.backtest.insider`, 2017-03 to 2026-11, $200 start. Data: 310,798 open-market
+purchases from the SEC data sets (filed 2016-01-04 to 2026-09-30).
+
+| strategy, full period | $200 → | CAGR | Sharpe | worst drop |
+|---|---|---|---|---|
+| SPY (benchmark) | $699 | | 0.80 | 34% |
+| IWM (small-cap benchmark) | $427 | 8.1% | 0.45 | 41% |
+| momentum 12-1 (baseline) | $1,535 | | 0.69 | 60% |
+| **R4a, any officer/director buy, 5 bps** | **$2,233** | 28.2% | **1.06** | **44%** |
+| R4b, cluster buys, 5 bps | $1,180 | | 0.79 | 57% |
+
+Held-out 2023+: R4a $200 → $658, Sharpe 1.47, worst drop 25% (IWM: $320, Sharpe 0.69).
+
+**Audit (cost sensitivity, R4a):**
+
+| cost per side | full $200 → | Sharpe | worst drop | held-out Sharpe |
+|---|---|---|---|---|
+| 5 bps | $2,233 | 1.06 | 44% | 1.47 |
+| 15 bps | $351 | 0.35 | 49% | 0.62 |
+| 30 bps | $21 | −0.72 | 90% | −0.70 |
+| 50 bps | $15 | −1.35 | 93% | 0.36 |
+
+- **Turnover is 194× a year** (43,814 trades), and 20,298 orders were skipped for being under $1. The names are mostly
+  small caps whose real spread plus impact is 15–50 bps, not 5. At 15 bps the edge is gone (below SPY and IWM).
+- Many of these small caps are **not fractionable** on Alpaca, so $10 positions in them can't be placed at all.
+- Before costs the signal is real and matches the papers: insiders' buys do outperform for about a month.
+- **Verdict:** fail on the pre-registered bar (worst drop 44% > 35%) even at the optimistic 5 bps, and the result
+  disappears at realistic small-cap costs. Don't build it. A large-cap-only, lower-turnover variant would be a new
+  idea and needs its own pre-registered entry; the literature says the effect is weakest in large caps.

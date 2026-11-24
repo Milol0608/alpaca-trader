@@ -49,6 +49,9 @@ class Settings(BaseSettings):
     # and carried ~2% of SPY's volume.
     data_feed: str = "sip"
 
+    # SEC EDGAR asks automated clients to identify themselves: "Name email" in the User-Agent.
+    sec_contact_email: str = ""
+
     data_dir: Path = Path("data")
     etfs_file: Path = Path("data/etfs.json")
     universe_size: int = 500           # most-traded stocks kept each month, plus the ETFs
