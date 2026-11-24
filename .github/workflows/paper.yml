@@ -1,0 +1,47 @@
+# Daily paper-trading run on GitHub's free runners (public repo).
+# Triggered by cron-job.org calling GitHub's workflow-dispatch API (see docs/HOSTING.md); GitHub's own
+# `schedule:` never fired for the sister repo, so it isn't relied on here.
+# PAPER ONLY: the workflow pins MODE=paper and has no live keys.
+name: paper
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Plan orders but don't send them"
+        type: boolean
+        default: false
+
+concurrency:
+  group: paper
+  cancel-in-progress: false   # never run two rebalances against the same account at once
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MODE: paper
+      DATA_FEED: sip
+      ALPACA_PAPER_KEY_ID: ${{ secrets.ALPACA_PAPER_KEY_ID }}
+      ALPACA_PAPER_SECRET_KEY: ${{ secrets.ALPACA_PAPER_SECRET_KEY }}
+      SEC_CONTACT_EMAIL: ${{ secrets.SEC_CONTACT_EMAIL }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+      - name: Install
+        run: uv sync --frozen --no-dev
+      - name: Check secrets are present
+        # Prints only whether each is set, never any part of it.
+        run: |
+          for v in ALPACA_PAPER_KEY_ID ALPACA_PAPER_SECRET_KEY; do
+            if [ -z "${!v}" ]; then echo "::error::Add the $v repository secret (see docs/HOSTING.md)"; exit 1; fi
+            echo "$v is set"
+          done
+      - name: Paper trade
+        run: uv run python -m trader.paper ${{ inputs.dry_run && '--dry-run' || '' }}
