@@ -138,9 +138,27 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
   - Taking it (paying the fee) loses about 0.4–1¢ per contract.
   - As a maker, the upper bound is +1.5–2.5¢ per contract.
   - The gap may be shrinking: about −1.5¢ in late 2025, −0.3¢ to −0.8¢ in Oct–Nov 2026.
-  - Next is **K2**, a fill simulation from real Kalshi trade history.
-- **Next in the backlog:** K2 (maker fills), the Kalshi liquidity rule, the tracked-portfolio cap, P2 items (intraday
-  SPY momentum, insider buying, daily lows, rain, TSA), and tennis as research only.
+- **K2 Kalshi maker orders, replayed on the real trade tape (9,384 markets): favorites PASS, longshots FAIL.**
+  - Buying YES at the best bid at 8pm the evening before, on favorites priced 65–95¢, filled 89% of the time under
+    the strict fill rule.
+  - It made +7.0¢ per contract (95% CI +2.8 to +11.2), and +5.1¢ in Jul–Nov alone.
+  - Selling longshots as a maker: +0.55¢, CI includes zero, about 0 in recent months.
+  - Makers pay no fee in weather. Verified from the API: weather series are `quadratic`; Fed/CPI/NFL are
+    `quadratic_with_maker_fees`.
+  - It's small: about 1.5 markets a day, roughly $15–30 a month at 5–10 contracts.
+  - It **awaits owner approval** for a shadow slot.
+- **R3 intraday SPY momentum: FAIL.** No signal even before costs: 48.2% sign agreement, −14% a year net.
+- **R4 insider open-market buys: FAIL.** $2,233 and Sharpe 1.06 at 5 bps per side, but the worst drop was 44% and
+  turnover 194× a year in small caps. At a realistic 15 bps it's $351 (below SPY); at 30 bps it's $21.
+- **Research report:** Trading-bot/reports/Quick edge ideas for small bots.md.
+  - **Shortlist:** (1) Kalshi favorites as maker (= K2 B1), (2) daily low temperature with NBM, maker only,
+    (3) insider buys v2 (liquid names, low turnover, 30 bps), (4) TSA nowcast as maker (tiny depth),
+    (5) a read-only Kalshi vs Polymarket US gap logger.
+  - **Skip:** taker strategies, cheap longshots, crypto day trading, overnight/turn-of-month/PEAD/dividend capture,
+    matched betting, CME weather and live tennis.
+  - **Base rate:** most retail traders lose (82–84% of Polymarket wallets; 97% of persistent Brazilian day traders).
+- **Next in the backlog:** owner decision on the K2 B1 shadow slot, daily low temperature, the Kalshi liquidity rule,
+  the tracked-portfolio cap, TSA, a crypto slow-trend backtest, and tennis as research only.
 
 ## How to use this in a phone chat
 Discuss and explore ideas, questions and trade-offs. Anything decided should be written back into this file (via the

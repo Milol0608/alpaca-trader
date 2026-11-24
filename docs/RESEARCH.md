@@ -134,6 +134,35 @@ Data: 43,900 settled weather markets (eve) and 44,000 (am). Train: Sep 2025 – 
   **and** positive in the later half (Jul–Nov 2026) on its own, since K1 hinted the bias is shrinking. Passing earns a
   shadow slot only after owner approval. It doesn't earn real money.
 
+## K2 result: **favorites (B1) PASS; longshots (A) FAIL**
+Run with `uv run python -m app.backtest.makers` (Trading-bot) on every test-period market in the two zones: 9,384
+markets' full trade tape from the 8pm decision to close, from Kalshi's `/markets/trades` and `/historical/trades`.
+Cents are per contract. The CI is a 95% bootstrap over city-days.
+
+| rule | posted | fill % (through) | ¢/fill, through | 95% CI | Jul–Nov ¢ | ¢/fill, touch | ¢ if every order filled |
+|---|---|---|---|---|---|---|---|
+| A1 sell YES at the ask | 8,505 | 81% | +0.55 | [−0.16, +1.28] | +0.34 | +1.40 | +2.62 |
+| A2 sell YES at ask − 1¢ | 3,671 | 84% | +0.32 | [−0.77, +1.39] | +0.08 | +0.82 | +2.21 |
+| **B1 buy YES at the bid** | 396 | 89% | **+6.98** | **[+2.76, +11.20]** | **+5.10** | +8.28 | +9.51 |
+| B2 buy YES at bid + 1¢ | 179 | 93% | +6.52 | [+0.49, +12.43] | +1.59 | +6.98 | +8.45 |
+
+- **Fees verified:** Kalshi's API reports `fee_type: "quadratic"` (taker fee only) for KXHIGH*, KXLOWT* and KXTSAW,
+  while KXFED, KXCPI and KXNFLGAME are `"quadratic_with_maker_fees"`. So makers pay no fee in weather.
+- **Adverse selection is real but not fatal.** Filled orders earn less than all orders would have (B1: 6.98¢ vs
+  9.51¢; A1: 0.55¢ vs 2.62¢). It eats almost all of the longshot edge and about a quarter of the favorite edge.
+- **Longshots (A):** the CI includes zero and the later months are near zero. **FAIL.** This matches K1's hint that
+  the longshot bias is shrinking.
+- **Favorites (B1):** it passes both parts of the bar: CI above zero and Jul–Nov positive. Evening favorites
+  (65–95¢) won 5–15¢ more often than priced in every month since March 2026. Even a taker at the ask, paying the
+  fee, made +4.66¢ (n = 419). That wasn't pre-registered; K1 skipped it because training had only 26 such markets.
+- **Capacity is small.** About 1.5 qualifying markets a day, so 352 fills in 9 months, about $25 per contract of size.
+  At 5–10 contracts per order that's roughly $15–30 a month on about $35–70 of capital at risk.
+- **Caveats:** one contract per market can't show queue position or depth at larger sizes. B is a small sample
+  (396 markets, about 130 city-weeks). The test period is the same one K1 looked at, but B's zone and rules were
+  fixed before running K2.
+- **Verdict:** B1 earns a **shadow slot pending owner approval**: post a buy-YES at the best bid at 8pm on evening
+  favorites (mid 65–95¢), one contract, and log fills against the tape. A and B2 don't.
+
 ---
 
 ## R3. Intraday SPY momentum (Gao, Han, Li & Zhou 2018). Registered 2026-11-24, before running
