@@ -303,3 +303,19 @@ Run with `uv run python -m trader.backtest.crypto_trend` (Coinbase daily candles
 - **Verdict:** fail. Crypto as a slow trend overlay doesn't meet the owner's 35% drop limit at any setting tested.
   A 10–20% crypto sleeve inside a stock portfolio would be a different, portfolio-level question and isn't
   registered.
+
+---
+
+## K3. K2's favorites rule on Kalshi DAILY LOW temperature markets. Registered 2026-11-24, before running
+- **Why:** K2 B1 passed on daily highs. Daily-low series (KXLOWT*) are also maker-fee-free (API `fee_type:
+  "quadratic"`, checked 2026-11-24), and the report found NYC lows trade about 31k contracts a day. If the
+  same mispricing exists there, it roughly doubles the rule's capacity.
+- **Rule, unchanged from K2 (no re-tuning):** at 8pm local standard time the evening before the market's day,
+  for each bucket with YES mid in [65¢, 95¢), post a buy-YES at the best bid. 1 contract, held to settlement.
+  The price comes from Kalshi's hourly candlesticks (the last candle at or before the decision time), as in K1/K2.
+- **Fills:** from the real trade tape after the decision time, with the same "through" (conservative) and "touch"
+  rules as K2.
+- **Markets:** every settled daily-low market Kalshi has, in all KXLOWT* series. No weather data is needed.
+- **Pass bar (same as K2):** conservative-fill P&L > 0 with a 95% bootstrap CI over city-days above zero, **and**
+  positive in Jul–Nov 2026 on its own. At least 100 fills, or the result is "not enough data", not a pass.
+- **Also reported, not part of the bar:** the same rule as a taker (buy at the ask, pay the fee).
