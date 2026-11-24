@@ -18,20 +18,62 @@ proposals until they're written here.
 - Keys live only in a local `.env` (gitignored) and GitHub secrets. Never paste keys in chat.
 
 ## Bot 1: kalshi-forecaster (https://github.com/Milol0608/kalshi-forecaster, public)
-- **What it does:** forecasts Kalshi daily high-temperature markets (24 US cities) and places simulated trades with
-  real fee math. Shadow mode with a $100 fake bankroll.
-- **Hosting:** GitHub Actions, started hourly by a cron-job.org job (GitHub's own scheduler never fired). Free Neon
-  Postgres. Runs with the owner's laptop off.
-- **Model history:**
-  - `ens-v1.1` (GFS + ECMWF ensembles) lost to the market in a full backtest at both decision times.
-  - It was replaced as the trading model by `nbm-blend-v1`: NOAA's National Blend of Models, calibrated per station
-    and mixed with the market price.
-  - Backtest Mar–Nov 2026: Brier +0.0008 better than the market (statistically real but tiny). The simulation turned
-    $100 into $151 with a 71% worst drawdown.
-  - Verdict: "a candidate, not proven." It's judged by forward shadow results.
-- **Status 2026-11-24:** 10 open shadow positions ($24.99), none settled yet, P&L $0.00.
-- **Open ideas:** walk-forward tuning of min edge and bet size; exiting at 8am when the forecast flips; daily loss
-  limit; a kill switch that pauses rather than stops; market making (0% maker fee); other categories.
+
+### What Kalshi is and what we trade
+- Kalshi is a US-regulated (CFTC) prediction market. Each contract pays **$1 if YES** happens, $0 otherwise, and
+  trades between 1¢ and 99¢. The price is roughly the market's probability.
+- We trade only **daily high-temperature markets** for 24 US cities (e.g. "Will NYC's high be 44–45°F on Nov 25?").
+  Each city-day is an *event* with several buckets that together cover every possible temperature: exactly one
+  bucket settles YES.
+- **Settlement source:** the official NWS daily climate report for a named station: Central Park (KNYC), Chicago
+  Midway (KMDW), Houston Hobby (KHOU), Dallas DFW, DC Reagan (DCA), and so on. Since Aug 2026 Kalshi's rules name
+  The Weather Company, using the same stations. The "day" is **midnight to midnight local standard time** (it ignores
+  daylight saving).
+- **Fees:** taker fee = round up(0.07 × contracts × price × (1 − price)), so it's largest at 50¢. No settlement fee.
+  Maker (resting) orders on these series pay 0%.
+- No sports, no leverage.
+
+### How the bot works (each hourly run)
+1. **Scan:** reads all open temperature markets, prices and order books from Kalshi's production API (read-only, no
+   keys needed in shadow).
+2. **Parse rules:** a regex parser (no AI) reads each market's rules for station, date and bucket range, and
+   cross-checks that the event's buckets cover all temperatures exactly once.
+3. **Weather:** downloads NOAA's National Blend of Models (NBM) station bulletin (free, public domain), plus the GFS
+   and ECMWF ensembles from Open-Meteo for the old model. Official observed highs come from the IEM archive.
+4. **Forecast:** turns NBM's forecast high and its uncertainty into a probability for each bucket, calibrated per
+   station on past data. That's then **mixed with the market's own price** (a logistic blend that leans about 80% on
+   the market). It only forecasts days that haven't started yet.
+5. **Shadow trade:** buys when `edge = our probability − ask price − fee ≥ 3¢`. Sizes with quarter-Kelly, capped at
+   5% of bankroll per market, 10% per city-day and 25% total. Walks the real order book for realistic fills.
+   **Kill switch** at a 30% drawdown from peak.
+6. **Settle:** after the NWS report comes out (usually the next morning), it settles positions with real fee math.
+7. **Report:** Brier score and log loss against the market, P&L net of fees, drawdown, and run health.
+- Everything is logged in Postgres (Neon free tier) with no look-ahead: each decision records exactly what data it
+  used and when.
+
+### Hosting
+GitHub Actions, started hourly by a cron-job.org job (GitHub's own scheduler never fired), using a token limited to
+starting that repo's runs. Free Neon Postgres. Runs with the owner's laptop off. The report flags gaps over 2 hours.
+
+### What the testing showed
+- Full backtest: 24 cities, about 44,000 settled markets. Trained before Mar 2026, tested Mar–Nov 2026.
+- **Our own model (`ens-v1.1`, GFS + ECMWF):** clearly worse than the market (Brier 0.132 vs 0.105). Trading it lost
+  the whole bankroll in simulation. It's retired from trading and only logs forecasts now.
+- **NBM alone:** better than our model, still worse than the market.
+- **NBM + market blend (`nbm-blend-v1`, now trading):** Brier +0.0008 better than the market, statistically real but
+  tiny. Simulated $100 → $151 with a 71% worst drawdown, and the 30% kill switch would have stopped it in Apr 2026.
+  The 8am version was inconsistent. Verdict: **a candidate, not proven.** It's judged by forward shadow results.
+- What's probably happening: the blend's gain comes from pushing the market's own prices further from 50%, which
+  hints that the market slightly underprices outcomes near 0% and 100%. That edge is smaller than taker fees plus the
+  spread, which is why market making (0% maker fee) is the next idea.
+
+### Status 2026-11-24
+10 open shadow positions ($24.99 of the $100 fake bankroll), opened by the old model on 2026-11-23. None settled yet,
+P&L $0.00. Since the NBM blend took over, it has found no trades (its prices are too close to the market's).
+
+### Open ideas
+Walk-forward tuning of min edge and bet size; exiting at 8am when the forecast flips; a daily loss limit; a kill switch
+that pauses rather than stops; market making with resting orders (0% maker fee); other Kalshi categories.
 
 ## Bot 2: alpaca-trader (https://github.com/Milol0608/alpaca-trader, public)
 - **What it does:** systematic US stock strategies, paper-traded on Alpaca. The paper account has $200, cash only:
