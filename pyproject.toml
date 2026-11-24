@@ -9,6 +9,7 @@ dependencies = [
     "pydantic-settings>=2.3",
     "polars>=1.0",
     "numpy>=2.0",
+    "tzdata>=2026.6",
 ]
 
 [dependency-groups]
