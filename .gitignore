@@ -1,0 +1,14 @@
+.env
+*.pem
+*.key
+gate_passed.json
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.idea/
+logs/
+# Downloaded market history is large and re-creatable; only hand-written inputs are tracked.
+data/*
+!data/etfs.json
