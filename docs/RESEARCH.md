@@ -163,3 +163,23 @@ Data: 43,900 settled weather markets (eve) and 44,000 (am). Train: Sep 2025 – 
   can't rescue it.
 - The published effect (Gao et al., 1993–2013) hasn't held in 2016–2026 SPY data.
 - **Verdict:** fail. Don't build it. Half-days put a few post-market 15:30 bars in the sample, too few to matter.
+
+---
+
+## R4. Insider open-market purchases (SEC Form 4). Registered 2026-11-24, before running
+- **Hypothesis (Lakonishok & Lee 2001; Jeng, Metrick & Zeckhauser 2003; Cohen, Malloy & Pomorski 2012):** stocks
+  bought by their own officers and directors in open-market purchases (transaction code P) outperform for about a
+  month, and more so when several insiders buy within a few days ("cluster" buys).
+- **Data:** the SEC's quarterly Form 3/4/5 structured data sets (free, EDGAR) for 2016–2026, joined to our daily SIP
+  bars.
+- **No look-ahead:** a trade counts only from its **filing date**, never the transaction date. Entry is at the next
+  trading day's open after the filing date, which is conservative because filings arrive through the day.
+- **Rules (fixed now):**
+  - **R4a:** any officer or director purchase of at least $10,000. Hold 21 trading days, equal weight, at most 20
+    positions.
+  - **R4b (cluster):** at least 2 different insiders buying the same stock within 5 calendar days (by filing date).
+    Same holding rule.
+  - **Tradable filter, all as of the day before entry:** price ≥ $5 and 60-day median dollar volume ≥ $1M, so $10
+    positions are realistic. 5 bps per side.
+- **Pass bar:** Sharpe above SPY's, worst drop under 35%, final value above SPY's, after costs, 2017–2026, and not
+  losing to SPY in the held-out window from 2023. It must also beat plain momentum's final value, per the brief.
