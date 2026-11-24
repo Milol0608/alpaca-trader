@@ -1,9 +1,57 @@
 {
-  "_note": "Liquid ETFs always kept in the universe, alongside the most-traded stocks. A research universe, not a recommendation.",
-  "broad_us": ["SPY", "QQQ", "IWM", "DIA", "VTI", "MDY"],
-  "international": ["EFA", "EEM", "VWO", "EWJ", "FXI"],
-  "bonds": ["TLT", "IEF", "SHY", "AGG", "BND", "LQD", "HYG", "TIP"],
-  "commodities": ["GLD", "IAU", "SLV", "USO", "DBC"],
-  "real_estate": ["VNQ"],
-  "sectors": ["XLK", "XLF", "XLE", "XLV", "XLY", "XLP", "XLI", "XLB", "XLU", "XLRE", "XLC", "SMH", "XBI", "KRE"]
+  "_note": "Liquid ETFs always kept in the universe, alongside the most-traded stocks. A research universe, not a recommendation. SH is a plain (1x, non-leveraged) inverse S&P 500 fund: the account is long-only, so buying it is the only way to hold a falling-market position.",
+  "broad_us": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "DIA",
+    "VTI",
+    "MDY"
+  ],
+  "international": [
+    "EFA",
+    "EEM",
+    "VWO",
+    "EWJ",
+    "FXI"
+  ],
+  "bonds": [
+    "TLT",
+    "IEF",
+    "SHY",
+    "AGG",
+    "BND",
+    "LQD",
+    "HYG",
+    "TIP"
+  ],
+  "commodities": [
+    "GLD",
+    "IAU",
+    "SLV",
+    "USO",
+    "DBC"
+  ],
+  "real_estate": [
+    "VNQ"
+  ],
+  "sectors": [
+    "XLK",
+    "XLF",
+    "XLE",
+    "XLV",
+    "XLY",
+    "XLP",
+    "XLI",
+    "XLB",
+    "XLU",
+    "XLRE",
+    "XLC",
+    "SMH",
+    "XBI",
+    "KRE"
+  ],
+  "inverse": [
+    "SH"
+  ]
 }
