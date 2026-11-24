@@ -111,3 +111,12 @@ def test_zero_prices_are_treated_as_missing() -> None:
     uni = pl.DataFrame({"month": [date(2026, 1, 1)], "symbol": ["A"]})
     cx = build_context(daily, uni, date(2026, 1, 1), date(2026, 1, 31))
     assert np.isnan(cx.close[1, 0]) and np.isnan(cx.open[1, 0])
+
+
+def test_deposits_are_added_monthly_and_never_count_as_returns() -> None:
+    days = [date(2026, 1, 28), date(2026, 1, 29), date(2026, 2, 2), date(2026, 2, 3), date(2026, 3, 2)]
+    flat = [[10.0]] * 5
+    c = Context(days, ["A"], np.array(flat), np.array(flat), np.ones((5, 1)), {date(2026, 1, 1): {"A"}})
+    r = run(c, lambda w: {"A": 1.0}, "t", capital=100.0, cost_bps=0, start_index=0, monthly_deposit=50.0)
+    assert np.allclose(r.equity, [100, 100, 150, 150, 200])   # deposits on Feb 2 and Mar 2
+    assert np.allclose(r.returns(), 0.0)                        # flat prices: no gain, despite the deposits

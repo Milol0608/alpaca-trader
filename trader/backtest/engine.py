@@ -70,10 +70,13 @@ class Result:
     costs: float = 0.0
     skipped_small: int = 0
     delisted: int = 0
+    flows: np.ndarray | None = None  # money added each day (deposits); excluded from returns
     weights_log: list[tuple[date, dict[str, float]]] = field(default_factory=list)
 
     def returns(self) -> np.ndarray:
-        return np.diff(self.equity) / self.equity[:-1]
+        """Time-weighted daily returns: a deposit raises equity but isn't a gain."""
+        flows = self.flows if self.flows is not None else np.zeros_like(self.equity)
+        return (self.equity[1:] - flows[1:]) / self.equity[:-1] - 1
 
     def stats(self) -> dict[str, float]:
         r = self.returns()
@@ -115,7 +118,8 @@ def build_context(daily: pl.DataFrame, universe: pl.DataFrame, start: date, end:
 
 
 def run(ctx: Context, strategy: Strategy, name: str, *, capital: float = 200.0, cost_bps: float = 5.0,
-        min_order: float = 1.0, start_index: int = 1, delist_after: int = 5) -> Result:
+        min_order: float = 1.0, start_index: int = 1, delist_after: int = 5,
+        monthly_deposit: float = 0.0) -> Result:
     """delist_after: a holding with no bar for this many trading days in a row is closed at its last
     close (roughly a delisting or takeover cash-out). Without it, a reused ticker (AMTD was TD
     Ameritrade, later a different company) would re-price an old position at the new company's price."""
@@ -126,11 +130,16 @@ def run(ctx: Context, strategy: Strategy, name: str, *, capital: float = 200.0, 
     equity[:start_index] = capital
     res = Result(name, ctx.days, equity)
     target: dict[str, float] | None = None
+    flows = np.zeros(n_days)
+    res.flows = flows
     last_px = np.full(n_sym, np.nan)  # last known close, for valuing a holding on a day it has no bar
     missing = np.zeros(n_sym, dtype=int)  # consecutive days without a bar
     cost_rate = cost_bps / 1e4
     for i in range(start_index, n_days):
         cl, op = ctx.close[i], ctx.open[i]
+        if monthly_deposit and i > start_index and ctx.days[i].month != ctx.days[i - 1].month:
+            cash += monthly_deposit  # arrives before the open; invested at the next rebalance
+            flows[i] = monthly_deposit
         if target is not None:  # trade at today's open toward yesterday's decision
             px = np.where(np.isnan(op), np.nan, op)
             tradable = ~np.isnan(px)

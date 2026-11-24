@@ -128,6 +128,20 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
      kept private).
 - **Timeline:** both bots paper/shadow-trade for 1–2 months, then the owner reviews the results and decides.
 
+## Research results so far (details in docs/RESEARCH.md)
+- **R1 momentum + low vol: FAIL.** $540 vs SPY's $699, Sharpe 0.72 vs 0.80. It halves momentum's drop (34%) but
+  gives up most of the return.
+- **R2 momentum + SPY 200-day crash filter: FAIL, badly.** $241 (cash) or $111 (SH). It sells at the lows and misses
+  V-shaped rebounds: Apr 2026 momentum +43%, filter −3%.
+- **K1 Kalshi favorite-longshot bias: REAL but only a maker could use it.**
+  - Longshots are overpriced by about 1–1.5¢ and favorites underpriced, out of sample.
+  - Taking it (paying the fee) loses about 0.4–1¢ per contract.
+  - As a maker, the upper bound is +1.5–2.5¢ per contract.
+  - The gap may be shrinking: about −1.5¢ in late 2025, −0.3¢ to −0.8¢ in Oct–Nov 2026.
+  - Next is **K2**, a fill simulation from real Kalshi trade history.
+- **Next in the backlog:** K2 (maker fills), the Kalshi liquidity rule, the tracked-portfolio cap, P2 items (intraday
+  SPY momentum, insider buying, daily lows, rain, TSA), and tennis as research only.
+
 ## How to use this in a phone chat
 Discuss and explore ideas, questions and trade-offs. Anything decided should be written back into this file (via the
 desktop session) to become true. Mark guesses as guesses, and say plainly when something hasn't been tested.

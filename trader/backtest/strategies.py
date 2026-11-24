@@ -100,3 +100,46 @@ def trend_etfs(etfs: set[str], lookback: int = 200, *, force: bool = False, also
         held = [s for s, a in zip(names, above) if a and not np.isnan(c[-1][names.index(s)])]
         return {s: 1.0 / len(held) for s in held} if held else {}
     return strat
+
+
+def momentum_low_vol(etfs: set[str], n: int = 20, lookback: int = 252, skip: int = 21, vol_days: int = 60, *,
+                     force: bool = False, also_on: date | None = None):
+    """R1 (docs/RESEARCH.md): average of the 12-1 momentum rank and the 60-day volatility rank."""
+    def strat(w: Window):
+        if not _due(w, "month", force, also_on) or len(w.days) <= lookback:
+            return None
+        names, cols = _cols(w, w.allowed - etfs)
+        c = w.close[:, cols]
+        mom = c[-1 - skip] / c[-1 - lookback] - 1
+        with np.errstate(invalid="ignore", divide="ignore"):
+            r = np.diff(np.log(c[-vol_days - 1:]), axis=0)
+        vol = np.where(np.isnan(r).sum(axis=0) > vol_days // 5, np.nan, np.nanstd(r, axis=0))
+        ok = ~np.isnan(mom) & ~np.isnan(vol)
+        if not ok.any():
+            return {}
+        idx = np.nonzero(ok)[0]
+        mom_rank = np.argsort(np.argsort(-mom[idx]))   # 0 = strongest momentum
+        vol_rank = np.argsort(np.argsort(vol[idx]))    # 0 = calmest
+        score = (mom_rank + vol_rank) / 2.0
+        best = idx[np.argsort(score, kind="stable")[:n]]
+        return {names[k]: 1.0 / len(best) for k in best}
+    return strat
+
+
+def momentum_crash_filter(etfs: set[str], n: int = 20, lookback: int = 252, skip: int = 21, trend_days: int = 200,
+                          hedge: str | None = None, *, force: bool = False, also_on: date | None = None):
+    """R2 (docs/RESEARCH.md): momentum only while SPY is above its 200-day average; else cash
+    (hedge=None) or the hedge ETF (R2b: SH)."""
+    mom = momentum(etfs, n, lookback, skip, force=True)
+
+    def strat(w: Window):
+        if not _due(w, "month", force, also_on) or len(w.days) <= max(lookback, trend_days):
+            return None
+        k = w.index.get("SPY")
+        spy = w.close[-trend_days:, k] if k is not None else None
+        if spy is None or np.isnan(spy[-1]):
+            return mom(w)
+        if spy[-1] > np.nanmean(spy):
+            return mom(w)
+        return {hedge: 1.0} if hedge and hedge in w.index and not np.isnan(w.close[-1, w.index[hedge]]) else {}
+    return strat

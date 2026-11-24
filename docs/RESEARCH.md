@@ -49,3 +49,64 @@ treated as a bug until checked.
 - **Pass bar:** a rule fixed on the train months that is positive after fees on the test months in the pessimistic
   (taker) case. Or, if only the maker case is positive, it goes to K2 (a proper fill simulation from trade history)
   rather than to shadow.
+
+---
+
+# Results (run 2026-11-24)
+
+## R1. Momentum + low volatility: **FAIL**
+| window | strategy | $200 → | CAGR | Sharpe | worst drop | worst month |
+|---|---|---|---|---|---|---|
+| Mar 2017 – Nov 2026 | SPY | $699 | 13.7% | **0.80** | 34% | −13% |
+| | momentum 12-1 | $1,535 | 23.4% | 0.69 | 60% | −25% |
+| | **R1** | **$540** | 10.8% | 0.72 | **34%** | −12% |
+| held-out 2023 → | SPY | $398 | 19.4% | **1.23** | 19% | −6% |
+| | **R1** | **$308** | 11.8% | 0.92 | **13%** | −6% |
+
+- It halves momentum's drawdown, to SPY's level. But it also gives up most of the return, and its Sharpe stays below SPY's
+  in both windows. It lost to SPY in 6 of 10 calendar years.
+- **Verdict:** fails the bar (Sharpe and final value both below SPY's). Mixing in low volatility mostly turns momentum
+  into a dull, cheaper SPY. Not added to tracking.
+
+## R2 / R2b. Momentum with a SPY 200-day crash filter: **FAIL (badly)**
+| | $200 → | CAGR | Sharpe | worst drop |
+|---|---|---|---|---|
+| R2 → cash | $241 | 1.9% | 0.26 | 63% |
+| R2b → SH | $111 | −5.9% | 0.08 | 68% |
+
+- Worse than plain momentum on every measure, including the drawdown it was meant to cut.
+- **Why (audited, not a bug):** the filter matched momentum's holdings every month except when SPY dipped under its
+  average, and it sold at those lows, then missed the V-shaped rebounds. In Apr 2026 momentum gained +43% while R2 sat
+  in cash (−3%). It's the same in 2019 and 2020. The SH variant lost on both legs: short during the rebounds, long
+  momentum into the drops.
+- **Verdict:** fails. Monthly-checked trend filters whipsaw on fast V-shaped markets, and this decade has had several.
+
+## K1. Kalshi favorite-longshot bias (weather): **the bias is real; taker FAIL; maker → K2**
+Data: 43,900 settled weather markets (eve) and 44,000 (am). Train: Sep 2025 – Feb 2026. Test: Mar – Nov 2026.
+
+**Calibration (eve, test months): what the market priced vs how often it happened**
+
+| YES mid | priced | happened |
+|---|---|---|
+| 0–2¢ | 1.1% | 0.2% |
+| 2–5¢ | 3.2% | 2.0% |
+| 5–10¢ | 7.0% | 5.6% |
+| 10–20¢ | 14.5% | 13.1% |
+| 50–65¢ | 56.2% | 59.7% |
+| 65–80¢ | 69.6% | 78.2% |
+
+- Longshots are overpriced by about 1–1.5¢ and favorites underpriced, in both train and test and at both decision
+  times. This is the published Kalshi pattern, and it's in our weather data.
+- **Taker (buy NO on longshots at the YES bid, pay the fee):** the rule chosen on train loses on test, −0.44¢ per
+  contract over 13,218 trades (am: −1.02¢). **Fees and the spread eat the whole bias.** Fail.
+- **Maker (upper bound: filled at the bid, no fee, no adverse selection):** +1.5¢ to +2.5¢ per contract on test, every
+  variant, both decision times, about +$200–300 per contract-size over 9 months. **This is an upper bound, not a
+  result.** Resting orders tend to fill exactly when the price is moving against you, and fills aren't guaranteed.
+- **Is it shrinking?** Longshot mispricing by month (eve): −1.5¢ in Sep 2025, −0.8¢ in Oct 2026, −0.3¢ in Nov 2026.
+  The am trend is similar (−1.1¢ → −0.4¢). **Possibly shrinking.** Recent months are about a third of the older gap.
+  That's a guess from 15 monthly points, but it's the main risk to the idea.
+- A favorite rule ("buy YES at 65–95¢") showed +4.7¢ per contract as a taker in eve-test, but with only 26 train
+  examples, and it was negative at am. Noted, not trusted.
+- **Verdict:** the only effect found so far that is real and repeats out of sample. It can only be harvested as a
+  maker. Next is **K2**: replay real Kalshi trade history to see which resting orders would actually have filled,
+  and what they earned after fills, adverse selection and the 0% maker fee on these series.
