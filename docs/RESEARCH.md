@@ -110,3 +110,26 @@ Data: 43,900 settled weather markets (eve) and 44,000 (am). Train: Sep 2025 – 
 - **Verdict:** the only effect found so far that is real and repeats out of sample. It can only be harvested as a
   maker. Next is **K2**: replay real Kalshi trade history to see which resting orders would actually have filled,
   and what they earned after fills, adverse selection and the 0% maker fee on these series.
+
+---
+
+## K2. Kalshi maker orders on the longshot bias, replayed against real trades. Registered 2026-11-24, before running
+- **Hypothesis:** resting (maker) orders that sell overpriced longshots, and buy underpriced favorites, earn money
+  after fills and adverse selection. Weather series charge 0% maker fees (to verify against the fee schedule).
+- **Markets:** test period only (events from 2026-03-01). Rules come from K1's train months: at 8pm the evening before:
+  - **A, longshots:** YES mid in 5–20¢ (K1's train-chosen maker zone). Post a **sell-YES (= buy NO)** limit. A1 joins
+    the best ask (P = YES ask). A2 improves by 1¢ when the spread is at least 2¢ (P = ask − 1¢).
+  - **B, favorites:** YES mid in 65–95¢. Post a **buy-YES** limit. B1 joins the best bid. B2 improves by 1¢ when the
+    spread is at least 2¢.
+  - One contract per market, kept until the market closes.
+- **Fills, from Kalshi's real trade tape after the order time:**
+  - *conservative "through":* filled only if a later trade happened at a price **beyond** ours (a YES buyer paid
+    more than our ask, or a YES seller got less than our bid). That can only happen after every order at our price
+    was taken.
+  - *optimistic "touch":* also filled when a trade happened **at** our price. We might really have been behind the
+    queue.
+- **Measured:** fill rate, P&L per filled contract, total, by month, plus **adverse selection**: filled orders' P&L
+  compared with what the same orders would have made had all of them filled.
+- **Pass bar:** conservative-fill P&L > 0 on the test period with a 95% bootstrap CI (over city-days) above zero,
+  **and** positive in the later half (Jul–Nov 2026) on its own, since K1 hinted the bias is shrinking. Passing earns a
+  shadow slot only after owner approval. It doesn't earn real money.
