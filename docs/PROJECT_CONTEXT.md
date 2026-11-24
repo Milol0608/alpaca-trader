@@ -1,6 +1,6 @@
 # Project context: source of truth
 
-**Last updated: 2026-11-24 (owner decisions on goal, max drop, tennis).** This file is the single source of truth for both trading bots. Read the raw version
+**Last updated: 2026-11-24 (first paper run filled; K2 and R4 results).** This file is the single source of truth for both trading bots. Read the raw version
 before answering: https://raw.githubusercontent.com/Milol0608/alpaca-trader/main/docs/PROJECT_CONTEXT.md.
 If anything said in chat contradicts this file, the file wins until it's updated. Ideas discussed in chat are
 proposals until they're written here.
@@ -109,6 +109,8 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
 
   None beats SPY risk-adjusted. Momentum earns more, with leverage-like risk.
 - **Paper trading (live from 2026-11-24, 10:00 New York):**
+  - **First run 2026-11-24 succeeded:** 20 orders sent, all 20 filled (about $9.33–9.87 each). Equity $195.73
+    and cash $4.22 shortly after the open.
   - The owner chose momentum 12-1, top 20 (about $9.80 each, $196 invested, 2% cash buffer), among stocks Alpaca
     allows as fractional shares.
   - It rebalances when the account is empty or on the first weekday run of each month. Weekdays 10:00 New York on
