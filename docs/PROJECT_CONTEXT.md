@@ -141,8 +141,8 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
 - **K2 Kalshi maker orders, replayed on the real trade tape (9,384 markets): favorites PASS, longshots FAIL.**
   - Buying YES at the best bid at 8pm the evening before, on favorites priced 65–95¢, filled 89% of the time under
     the strict fill rule.
-  - It made +7.0¢ per contract (95% CI +2.8 to +11.2), and +5.1¢ in Jul–Nov alone.
-  - Selling longshots as a maker: +0.55¢, CI includes zero, about 0 in recent months.
+  - It made +7.1¢ per contract (95% CI +3.0 to +11.1), and +5.4¢ in Jul–Nov alone.
+  - Selling longshots as a maker: +0.47¢, CI includes zero, about 0 in recent months.
   - Makers pay no fee in weather. Verified from the API: weather series are `quadratic`; Fed/CPI/NFL are
     `quadratic_with_maker_fees`.
   - It's small: about 1.5 markets a day, roughly $15–30 a month at 5–10 contracts.
