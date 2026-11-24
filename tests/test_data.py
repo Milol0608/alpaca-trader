@@ -83,3 +83,28 @@ def test_universe_drops_penny_stocks_and_thin_history() -> None:
     new = _daily({"NEW": 9e9}, date(2026, 1, 25), 7)
     uni = build_universe(pl.concat([base, cheap, new]), assets, [], size=5, lookback=20)
     assert uni.filter(pl.col("month") == date(2026, 2, 1))["symbol"].to_list() == ["OK"]
+
+
+def test_a_symbol_the_api_rejects_is_dropped_not_fatal(tmp_path: Path) -> None:
+    calls: list[str] = []
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        syms = req.url.params["symbols"]
+        calls.append(syms)
+        if "BAD1" in syms.split(","):
+            return httpx.Response(400, json={"message": "invalid symbol: BAD1"})
+        return httpx.Response(200, json={"bars": {s: [{"t": "2025-01-02T05:00:00Z", "o": 1, "h": 1, "l": 1, "c": 2.0,
+                                                        "v": 5, "n": 1, "vw": 2.0}] for s in syms.split(",")},
+                                         "next_page_token": None})
+
+    with AlpacaClient("https://p", "https://d", "K", "S", transport=httpx.MockTransport(handler), sleep=lambda s: None) as c:
+        download(c, ["AAA", "BAD1", "BBB"], "1Day", date(2025, 1, 1), date(2025, 1, 31), tmp_path, today=date(2025, 2, 1))
+    assert calls == ["AAA,BAD1,BBB", "AAA,BBB"]
+    assert sorted(load_bars(tmp_path, "1Day").collect()["symbol"].to_list()) == ["AAA", "BBB"]
+
+
+def test_ticker_filter_keeps_share_classes_drops_units_rights_and_ids() -> None:
+    from trader.data.bars import TICKER
+    keep = ["AAPL", "BRK.B", "BF.B", "F"]
+    drop = ["0029900E0", "003CVR016", "AAC.U", "AAC.WS", "ABR.PRA", "ACP.RT"]
+    assert all(TICKER.match(s) for s in keep) and not any(TICKER.match(s) for s in drop)

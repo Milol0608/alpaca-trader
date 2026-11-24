@@ -10,16 +10,21 @@ Each request batch is saved as a part file first, so an interrupted year resumes
 from __future__ import annotations
 
 import logging
+import re
 from datetime import date
 from pathlib import Path
 
 import polars as pl
 
-from trader.alpaca.client import AlpacaClient
+from trader.alpaca.client import AlpacaClient, AlpacaError
 
 log = logging.getLogger(__name__)
 
 MAJOR_EXCHANGES = {"NYSE", "NASDAQ", "ARCA", "NYSEARCA", "AMEX", "BATS"}
+# Common shares and share classes (BRK.B). Leaves out units (.U), warrants (.WS), rights (.RT),
+# preferreds (.PRA) and the CUSIP-like ids Alpaca lists for old rights/CVRs, which the bars API rejects.
+TICKER = re.compile(r"^[A-Z]{1,5}(\.[A-TV-Z])?$")  # .U is a unit, not a share class
+INVALID = re.compile(r"invalid symbol: ([A-Za-z0-9./-]+)")
 SCHEMA = {"symbol": pl.Utf8, "t": pl.Datetime("us", "UTC"), "open": pl.Float64, "high": pl.Float64,
           "low": pl.Float64, "close": pl.Float64, "volume": pl.Float64, "trades": pl.Int64, "vwap": pl.Float64}
 # Symbols per request: a page holds 10,000 bars across all symbols, so fewer symbols per
@@ -33,7 +38,7 @@ def fetch_assets(client: AlpacaClient, path: Path) -> pl.DataFrame:
     rows = []
     for status in ("active", "inactive"):
         for a in client.assets(status=status):
-            if a.get("exchange") in MAJOR_EXCHANGES:
+            if a.get("exchange") in MAJOR_EXCHANGES and TICKER.match(a["symbol"]):
                 rows.append({"symbol": a["symbol"], "name": a.get("name") or "", "exchange": a["exchange"],
                              "status": a["status"], "tradable": bool(a.get("tradable")),
                              "fractionable": bool(a.get("fractionable"))})
@@ -55,6 +60,21 @@ def _rows(pairs) -> pl.DataFrame:
         [pl.col(c).cast(t) for c, t in SCHEMA.items()])
 
 
+def _fetch_batch(client: AlpacaClient, batch: list[str], timeframe: str, s: str, e: str, feed: str) -> pl.DataFrame:
+    """A symbol the API calls invalid is dropped from the batch (and logged), not allowed to stop the run."""
+    batch = list(batch)
+    while batch:
+        try:
+            return _rows(client.bars(batch, timeframe, s, e, feed=feed))
+        except AlpacaError as err:
+            m = INVALID.search(str(err))
+            if not m or m.group(1) not in batch:
+                raise
+            log.warning("dropping %s: the API says it's an invalid symbol", m.group(1))
+            batch.remove(m.group(1))
+    return pl.DataFrame(schema=SCHEMA)
+
+
 def download_year(client: AlpacaClient, symbols: list[str], timeframe: str, year: int, out_dir: Path,
                   *, start: date | None = None, end: date | None = None, feed: str = "iex",
                   chunk: int | None = None) -> Path:
@@ -69,7 +89,7 @@ def download_year(client: AlpacaClient, symbols: list[str], timeframe: str, year
         part = parts / f"{i:05d}.parquet"
         if part.exists():
             continue
-        _rows(client.bars(batch, timeframe, s, e, feed=feed)).write_parquet(part)
+        _fetch_batch(client, batch, timeframe, s, e, feed).write_parquet(part)
         if (i + 1) % 10 == 0 or i + 1 == len(batches):
             log.info("%s %d: %d/%d batches, %d calls so far", timeframe, year, i + 1, len(batches), client.calls)
     frames = [pl.read_parquet(p) for p in sorted(parts.glob("*.parquet"))]
