@@ -11,7 +11,7 @@ Market history since 2016 for every listed stock is tens of millions of rows.
 - **History in Parquet files** (polars), one file per timeframe and year. Postgres, the same free Neon project as
   kalshi-forecaster but a separate database, will hold only live paper-trading state.
 - **A raw httpx client** for the few endpoints used, with shapes checked against Alpaca's API reference.
-- **IEX feed** (free plan). A paid feed can be switched in with `DATA_FEED`.
+- **IEX feed** (free plan). A paid feed can be switched in with `DATA_FEED`. *Superseded the same day; see Update.*
 - **Universe:** each month, the top 500 stocks by trailing 60-day median dollar volume, using only prior data, plus
   a fixed ETF list. Delisted stocks are included.
 
@@ -31,5 +31,12 @@ Market history since 2016 for every listed stock is tens of millions of rows.
   review.
 - A reused ticker (a delisted company's symbol reassigned) can mix two companies' histories. Not yet handled.
 
+## Update, 2026-11-24: SIP instead of IEX
+The docs suggested IEX was the only free feed. A test with the paper keys showed otherwise: the free plan serves SIP
+(all exchanges) daily and hourly bars from Jan 2016, withholding only the latest 15 minutes, while IEX starts in Aug
+2020. SPY's daily volume was 151M on SIP against 2.8M on IEX. So history and live decisions both use SIP, with the
+15-minute lag built in, and the backtest and the bot see the same data. The consequence about IEX-only volumes no
+longer applies.
+
 ## Status
-Accepted, 2026-11-24.
+Accepted, 2026-11-24. Feed choice amended the same day (see Update).

@@ -43,9 +43,11 @@ class Settings(BaseSettings):
     alpaca_data_url: str = "https://data.alpaca.markets"
     # Free (Basic) plan: 200 historical data calls/minute. Stay a little under it.
     data_requests_per_minute: int = 180
-    # Free plan: IEX is the only feed usable without a subscription (docs). It's one exchange's
-    # trades, so volumes are a fraction of the whole market's.
-    data_feed: str = "iex"
+    # SIP = the whole market (all exchanges). Tested 2026-11-24 with the free plan: SIP bars are
+    # served from Jan 2016 (daily and hourly); only the latest 15 minutes are withheld, so decisions
+    # use bars that closed at least 15 minutes earlier. IEX (one exchange) only goes back to Aug 2020
+    # and carried ~2% of SPY's volume.
+    data_feed: str = "sip"
 
     data_dir: Path = Path("data")
     etfs_file: Path = Path("data/etfs.json")

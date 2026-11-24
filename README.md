@@ -28,8 +28,9 @@ uv run python -m trader.data.download intraday --timeframe 1Hour --start 2019-01
 ```
 - **Bars:** `data/bars/{timeframe}/{year}.parquet`, adjusted for splits and dividends. They're large, re-creatable,
   and gitignored.
-- **Feed:** IEX, the only feed on Alpaca's free plan. It's one exchange, so volumes are a fraction of the market's and
-  intraday bars are thinner than consolidated data. Prices of large, liquid stocks track the consolidated tape closely.
+- **Feed:** SIP, the whole market. The free plan serves it from Jan 2016, for daily and hourly bars, and withholds
+  only the latest 15 minutes, so decisions use bars that closed at least 15 minutes earlier (tested 2026-11-24).
+  Hourly bars include pre-market and after-hours (04:00–20:00 New York time). IEX alone starts in Aug 2020.
 - **Universe (`data/universe.parquet`):** each month, the 500 most-traded stocks by median dollar volume over the
   previous 60 trading days (price ≥ $5), plus the ETFs in `data/etfs.json`. It uses only data from before that
   month, so a backtest can't pick stocks with hindsight. Delisted stocks are included where Alpaca has them, to
