@@ -1,6 +1,6 @@
 # Project context: source of truth
 
-**Last updated: 2026-11-24.** This file is the single source of truth for both trading bots. Read the raw version
+**Last updated: 2026-11-24 (paper trading wired up).** This file is the single source of truth for both trading bots. Read the raw version
 before answering: https://raw.githubusercontent.com/Milol0608/alpaca-trader/main/docs/PROJECT_CONTEXT.md.
 If anything said in chat contradicts this file, the file wins until it's updated. Ideas discussed in chat are
 proposals until they're written here.
@@ -96,11 +96,17 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
   | trend ETFs | $375 | 6.7% | 22% | 0.61 |
 
   None beats SPY risk-adjusted. Momentum earns more, with leverage-like risk.
-- **Paper trading (being built 2026-11-24):**
-  - The owner chose momentum 12-1, top 20, about $10 each, to place paper orders.
-  - It rebalances on the first run of each month. Since the account starts empty, the first run buys immediately.
-  - GitHub Actions run weekdays at 10:00 New York time, started by cron-job.org.
-  - All five strategies are also tracked as simulated portfolios on live prices from 2026-11-23.
+- **Paper trading (live from 2026-11-24, 10:00 New York):**
+  - The owner chose momentum 12-1, top 20 (about $9.80 each, $196 invested, 2% cash buffer), among stocks Alpaca
+    allows as fractional shares.
+  - It rebalances when the account is empty or on the first weekday run of each month. Weekdays 10:00 New York on
+    GitHub Actions, started by cron-job.org.
+  - Guards: paper host only, no order over 15% of equity, orders under $1 skipped, never spends more cash than it
+    has, and tagged orders, so a double trigger can't trade twice.
+  - First planned buys (dry run): MRNA, SNDK, AXTI, TWST, MU, TXG, DELL, AAOI, LITE, MRVL, HPE, ASX, OKTA, RVMD, STX,
+    INTC, AMD, VLO, MPC, WDC. Heavy in semiconductors and tech, which is what 12-month momentum picks after a tech run.
+  - All five baselines are forward-tracked as simulated $200 portfolios from 2026-11-23. Results are on each run's
+    GitHub summary page.
 - **Planned next:**
   1. Hourly data and intraday strategies (the owner wants intraday and daily tested).
   2. Walk-forward tuning.

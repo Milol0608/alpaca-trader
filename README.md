@@ -9,8 +9,12 @@ benchmark is the market (buy-and-hold SPY), costs are counted, no look-ahead, an
 ## Status
 - **Milestone 1 (done):** settings and live lock, Alpaca client (data plus read-only account), the history
   download, and the point-in-time universe.
-- Next: backtest engine (walk-forward, costs, SPY benchmark), daily and intraday strategies, paper execution,
-  hourly hosting, reports.
+- **Milestone 2 (done):** daily backtest engine and 4 baselines vs SPY (`docs/BACKTEST.md`). None beats SPY
+  risk-adjusted.
+- **Paper trading (live since 2026-11-24):** momentum 12-1, top 20, in the $200 paper account, weekdays at 10:00
+  New York on GitHub Actions. All baselines are forward-tracked (`docs/adr/0002-paper-execution.md`, `docs/HOSTING.md`).
+- **Next:** hourly data and intraday strategies, walk-forward tuning, news signals (SEC EDGAR, GDELT, press wires).
+- **Shared context for any chat:** `docs/PROJECT_CONTEXT.md`.
 
 ## Setup
 1. `uv sync`
