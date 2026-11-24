@@ -243,3 +243,30 @@ Held-out 2023+: R4a $200 → $658, Sharpe 1.47, worst drop 25% (IWM: $320, Sharp
 - **Verdict:** fail on the pre-registered bar (worst drop 44% > 35%) even at the optimistic 5 bps, and the result
   disappears at realistic small-cap costs. Don't build it. A large-cap-only, lower-turnover variant would be a new
   idea and needs its own pre-registered entry; the literature says the effect is weakest in large caps.
+
+---
+
+## R5. Insider buys v2: liquid large caps, low turnover. Registered 2026-11-24, before running
+- **Why:** R4's signal was real before costs but needed small caps and 194× turnover. This asks whether any of
+  it survives where a $10 order is really cheap. The literature expects a weaker effect here, so it may fail.
+- **Universe:** a stock counts only if it is in that month's point-in-time top-500 universe
+  (`data/universe.parquet`), the same one momentum uses.
+- **Rules (fixed now):** an officer or director open-market purchase of at least $50,000, by filing date, with
+  entry at the next open. Hold 63 trading days (about 3 months), equal weight, at most 20 names (largest
+  purchases first). A repeat buy restarts the clock.
+- **Costs:** scored at 10 bps per side, also reported at 30 bps.
+- **Pass bar (same as every stock idea):** at 10 bps, over 2017-03 to now, Sharpe above SPY's, final value above
+  SPY's, worst drop under 35%, and not losing to SPY in the held-out window from 2023. At 30 bps Sharpe must still
+  be at least SPY's.
+
+## C1. Crypto slow trend filter, BTC + ETH (spot, long-only). Registered 2026-11-24, before running
+- **Hypothesis (time-series momentum in crypto, e.g. Liu & Tsyvinski 2021):** holding BTC/ETH only while each is
+  above its 20-week moving average avoids most of the deep crypto drawdowns and keeps most of the upside.
+- **Data:** Coinbase public daily candles (no key), BTC-USD and ETH-USD, from 2017-01.
+- **Rules (fixed now):** every Monday's close, for each coin, hold it if its close is above its 140-day simple
+  moving average, else hold cash. Half the account each, rebalanced weekly, trading at the next day's open.
+- **Costs:** 25 bps per side (Alpaca crypto taker fee), also reported at 50 bps.
+- **Benchmarks:** SPY buy-and-hold and BTC buy-and-hold.
+- **Pass bar:** at 25 bps, 2017-03 to now, Sharpe above SPY's, worst drop under 35%, final above SPY's, and not
+  losing to SPY in the held-out window from 2023. Daily returns use every calendar day (crypto trades 7 days),
+  annualised with 365.
