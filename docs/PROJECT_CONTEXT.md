@@ -1,6 +1,6 @@
 # Project context: source of truth
 
-**Last updated: 2026-11-24 (paper trading wired up).** This file is the single source of truth for both trading bots. Read the raw version
+**Last updated: 2026-11-24 (owner decisions on goal, max drop, tennis).** This file is the single source of truth for both trading bots. Read the raw version
 before answering: https://raw.githubusercontent.com/Milol0608/alpaca-trader/main/docs/PROJECT_CONTEXT.md.
 If anything said in chat contradicts this file, the file wins until it's updated. Ideas discussed in chat are
 proposals until they're written here.
@@ -16,6 +16,18 @@ proposals until they're written here.
   the future. A result that looks too good is treated as a bug until proven otherwise; that has happened twice.
 - No Anthropic or LLM API key: scoring and parsing are local (regex, statistics, small local models).
 - Keys live only in a local `.env` (gitignored) and GitHub secrets. Never paste keys in chat.
+
+## Owner decisions (2026-11-24)
+- **The goal every test is judged against:** beat buy-and-hold SPY after costs, *risk-adjusted* (higher Sharpe),
+  out of sample, with a **worst drop under 35%** (about SPY's own worst in the test period). For Kalshi: beat the
+  market price after real fees, out of sample. "X% in a month" is not a goal; a backtest showing it is a bug.
+- **Sports:** no sports for trading. **Tennis is allowed as research only.** If the research is good, a thorough
+  test gets built before anything runs, still with no paper slot without the owner's approval.
+- **Research backlog:** the owner's brief (Nov 24, "research and test backlog") is worked in priority order. Each
+  experiment is pre-registered in `docs/RESEARCH.md` (hypothesis and pass bar *before* running), and only passing
+  items get a paper or shadow slot, after owner approval.
+- **Real money:** not before the 1–2 month review. Suggested start then: $400–500 plus $25–50 a month, the owner's
+  call. Separate accounts if friends join, and legal advice before any pooling.
 
 ## Bot 1: kalshi-forecaster (https://github.com/Milol0608/kalshi-forecaster, public)
 
