@@ -22,7 +22,8 @@
 | low volatility 60d, top 20 | $456 | 8.9% | 13.6% | 0.69 | 28% | 9.4x |
 | trend-following ETFs 200d | $375 | 6.7% | 11.8% | 0.61 | 22% | 4.5x |
 
-Year by year: momentum's lead comes from 2019–2020 and 2024–2025. It lost to SPY in 2017, 2021, 2022 and 2023.
+Year by year: momentum's lead comes from 2019–2020 and 2024–2025. It lost to SPY in 2017, 2018, 2021, 2023 and 2026 (to
+Nov), and beat it in 2022 by falling less (−11% vs −18%).
 
 **Reading:** none of the baselines beats SPY on risk-adjusted terms (Sharpe). Momentum made more money, but with
 2.5× SPY's volatility and a 60% drawdown, which is close to what leveraged SPY would have done. Low volatility and

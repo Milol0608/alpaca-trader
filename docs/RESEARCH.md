@@ -435,3 +435,31 @@ Run with `uv run python -m trader.backtest.r7`. EDGAR mapped 606 of 646 candidat
   them as "no news" rather than "unknown". It's a small share of the pool and doesn't change the verdict.
 - **Verdict:** filing counts and red flags don't improve momentum. A real headline-news scorer can only be judged
   forward (Alpaca news starts Apr 2026), so it would need months of logging before it means anything.
+
+## Kalshi rules simulated like the stock table (descriptive, 2026-11-24; not a new test)
+$100 start, every conservative fill from K2/K3/K4/K5 in date order (script: session scratchpad `kalshi_sim.py`).
+Stake = share of the current bankroll per bid, capped at 25% of the contracts that traded through our price, and a
+day's bids never exceed the bankroll. Sharpe uses calendar days (√365).
+
+| rule | size | period | fills | $100 → | Sharpe | worst drop | losing months |
+|---|---|---|---|---|---|---|---|
+| B1 highs | 1 contract | Mar–Nov 2026 | 374 | $126.50 | 4.32 | 2% | 0/9 |
+| B1 highs | 2% | | | $174.97 | 3.57 | 7% | 0/9 |
+| B1 highs | 5% | | | $306.44 | 2.87 | 18% | 1/9 |
+| K3 lows | 1 contract | Dec 2025–Nov 2026 | 416 | $122.76 | 3.02 | 4% | 3/12 |
+| K3 lows | 2% | | | $108.16 | 0.52 | 23% | 5/12 |
+| K3 lows | **5%** | | | **$63.41** | −0.63 | **65%** | 5/12 |
+| K4 TSA | 1 contract / 5% | Mar–Nov 2026 | 31 | $99.92 / $99.22 | ≈0 | 3% / 12% | 3–4/10 |
+| K5 gas | 1 contract / 5% | Mar–Nov 2026 | 54 | $100.67 / $92.60 | 0.25 / −0.24 | 4% / 29% | 3/9 |
+| B1 + K3 | 1 contract | Dec 2025–Nov 2026 | 790 | $149.26 | 5.05 | 3% | 1/12 |
+| B1 + K3 | 2% | | | $177.28 | 2.35 | 16% | 4/12 |
+| B1 + K3 | 5% | | | $144.40 | 0.91 | 53% | 4/12 |
+
+SPY over the same windows: +1.3% (Mar–Nov) to +7.1% (Dec–Nov), worst drop about 11%.
+
+- **Bet size matters as much as the edge.** Lows are positive per contract (+5.47¢) but lose 37% at a 5% stake:
+  their losing months (Sep–Oct 2026) came when the bankroll and the volume caps allowed the biggest bets.
+- The 1-contract Sharpe is high only because most of the $100 sits idle. Each bid risks under $1.
+- The projections spreadsheet's "5% stake" plan was built on highs alone. With lows added, 2% is the most we'd use,
+  and sizing should get its own pre-registered test before the live bot bets more than 1 contract.
+- V1 can't be simulated: no Polymarket US price history, and the one live check found 0 qualifying gaps.
