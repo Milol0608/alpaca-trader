@@ -793,3 +793,14 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   D1c $126.51 (7%) / $187.48 (28%).
 - Reading: the forecasts help (D1c ≫ D1b), but per-fill edge is a third of B1's; more trades, thinner, noisier.
   Worth watching live as a shadow, not worth switching to.
+
+## D2a result: stock decider without news: **FAIL (ridge and trees)**
+- Walk-forward, refit each January, top 20 of the 40-stock momentum pool, 5 bps per side.
+  - SPY: 2019–22 Sharpe 0.68 / worst drop 34%; 2023+ 1.23 / 19%. $200 from Jan 2019 → $652; from Jan 2023 → $398.
+  - Momentum 12-1 (live rule): 0.70 / 60%; 0.87 / 57%. $1,563; $690.
+  - D2a ridge: 0.50 / 67%; 0.82 / 56%. $934; $592.
+  - D2a trees: 0.60 / 59%; 0.85 / 52%. $1,103; $613.
+  - 70/30 SPY / D2a ridge 0.65 / 35%, trees 0.69 / 34%; 2023+ 1.10 / 25% and 1.09 / 24%. M70 (70/30 SPY /
+    momentum) 0.76 / 36%; 1.11 / 26%.
+- The model re-ranking is worse than plain momentum in both periods: it learns nothing the 12-1 ranking doesn't
+  already have, and it adds turnover. The pairs are closest to SPY but under it on 2023+ Sharpe.
