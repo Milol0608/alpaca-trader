@@ -530,3 +530,31 @@ Script: session scratchpad `s1_sizing.py`. Train ends 2026-07-31; test is 2026-0
 - **For the paper bot:** move from 1 contract to **¼ Kelly** (train p10 $182, median $280), not ½. The pre-registered
   choice passed, but with the edge already halved, the smaller size is the prudent first step. Re-check after 100
   live fills.
+
+## S2 result: portfolio rules: **all FAIL; 70/30 SPY/momentum comes closest**
+Run with `uv run python -m trader.backtest.s2`. Train Mar 2017 – Dec 2022, test Jan 2023 – Nov 2026, $200, 5 bps.
+
+| rule | train $200 → | Sharpe | worst drop | test $200 → | Sharpe | worst drop | verdict |
+|---|---|---|---|---|---|---|---|
+| SPY | $351 | 0.59 | 34% | $398 | 1.23 | 19% | benchmark |
+| momentum 12-1 (paper) | $445 | 0.54 | 60% | $690 | 0.87 | 57% | fail |
+| V vol-scaled momentum | $307 | 0.44 | 35% | $392 | 0.96 | 22% | fail |
+| D dual momentum | $217 | 0.17 | 38% | $320 | 0.86 | 19% | fail |
+| S sector momentum | $356 | 0.59 | 31% | $359 | 1.09 | 16% | fail on test |
+| H 52-week high | $330 | 0.53 | 29% | $294 | 0.61 | 27% | fail |
+| **M70 70% SPY / 30% momentum** | $392 | **0.61** | **36%** | $506 | 1.11 | 26% | fail (drop 1 pt over) |
+| M50 50/50 | $424 | 0.60 | 37% | $572 | 1.01 | 36% | fail |
+| P drawdown pause | $556 | 0.67 | 43% | $433 | 0.67 | 51% | fail |
+| V, rest in SPY | $399 | 0.56 | 40% | $538 | 1.08 | 27% | fail |
+| 70% SPY / 30% V | $347 | 0.59 | 34% | $401 | 1.24 | 17% | fail (ties SPY) |
+| P + V | $328 | 0.49 | 35% | $373 | 0.90 | 22% | fail |
+
+- **Nothing beats SPY on risk-adjusted return in both windows.** Volatility scaling does cut momentum's drop
+  (60% → 35%), as the paper says, but it gives up as much return.
+- **The SPY/momentum mixes are the most useful finding.** M70 over the full period: $993 vs SPY's $699, Sharpe 0.81
+  vs 0.80, worst drop 36% vs 34%. It's essentially SPY's risk with part of momentum's upside. It misses the bar by
+  one point of drawdown and loses to SPY on test Sharpe (1.11 vs 1.23), so it is **not a pass**. Picking it after
+  seeing these numbers would be the overfitting we're trying to avoid.
+- Resampled 5 years from $200 (median / bad case p10): SPY $394 / $263; M70 $483 / $282; momentum $647 / $226.
+- **Verdict:** no change to the paper account is justified by the bar. If the owner wants a smoother paper account,
+  M70 is the candidate to *register for forward paper testing*, not to adopt.

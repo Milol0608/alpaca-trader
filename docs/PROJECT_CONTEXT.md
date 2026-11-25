@@ -176,6 +176,10 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
   qualifying gaps out of 519 games. Enabling 4 weeks of logging is pending an owner decision.
 - **R6 stop-losses / profit targets (weekly, 10–15% stops, 25–30% targets): FAIL**, all 11 variants below plain
   momentum and SPY. **R7 SEC-filings news score: FAIL.** Monthly momentum stays unchanged on paper.
+- **S1 Kalshi sizing (chosen on Dec–Jul, judged on Aug–Nov):** only B1 highs survive (test edge +4.7¢, down from
+  +11.8¢). Lows' edge is **gone since August** (−0.4¢), so the earlier "add lows" proposal is withdrawn. Recommended
+  next paper step: B1 at ¼ Kelly instead of 1 contract, re-checked after 100 fills. Needs owner approval.
+- **S2 Alpaca portfolio rules:** all fail. 70/30 SPY/momentum is closest (full Sharpe 0.81 vs 0.80, drop 36%).
 - **Strategy review workbook:** Trading-bot/reports/Strategy review.xlsx (all strategies, yearly and monthly).
 - **Next in the backlog:** the Kalshi liquidity rule, the tracked-portfolio cap, tennis as research only, and
   possibly a long-short momentum test (needs a $2k margin account).
