@@ -633,3 +633,24 @@ Order size N per bid; we get min(N, 25% of the contracts that traded through our
   over city-days above zero, ≥ 200 favourites. Aug–Nov reported separately and must also be > 0.
 - **Stage 2 (only if stage 1 passes; needs the owner's OK to pull the exchange's daily time-and-sales CSVs):** a fill
   replay. A trade printed below our bid means our bid would have filled (the "through" rule; the CSV has no side).
+
+## K7 result: no underpriced favourites outside weather; **index hourly favourites look OVERpriced**
+Run with `uv run python -m app.backtest.k7_screen` (Trading-bot). "won − mid" = how much more often favourites won
+than their price implied; CI = 95% bootstrap over events.
+
+| series | train favs | won − mid (train) | 95% CI | test favs | won − mid (test) | 95% CI | stage 1 |
+|---|---|---|---|---|---|---|---|
+| KXBTCD Bitcoin hourly | 353 | −2.5¢ | [−8.0, +2.7] | 301 | −0.8¢ | [−5.9, +4.2] | fail |
+| KXETHD Ethereum hourly | 124 | +3.3¢ | [−2.4, +8.0] | 247 | +0.3¢ | [−6.1, +6.1] | too few |
+| KXINXU S&P hourly | 439 | −3.9¢ | [−9.6, +1.4] | 325 | **−6.7¢** | [−13.1, −0.5] | fail |
+| KXNASDAQ100U Nasdaq hourly | 416 | **−14.5¢** | [−22.6, −6.2] | 321 | −6.6¢ | [−13.6, +0.6] | fail |
+| KXINX S&P daily range | 0 | – | | 1 | | | no favourites 6h out |
+| KXWTI oil daily | 256 | −4.6¢ | [−12.6, +3.0] | 185 | −2.5¢ | [−11.5, +6.4] | fail |
+| KXRAIN daily rain | 11 | −24.1¢ | | 48 | −5.9¢ | | too few (listed from Jul) |
+
+- **The weather favourite bias doesn't generalise.** Crypto, oil and rain are close to fair or slightly overpriced.
+- **New, unregistered observation:** on the S&P and Nasdaq hourly series, favourites 30 minutes before the close
+  won **less** often than priced, in both windows. That's the opposite of weather, and it would be harvested by
+  *selling* favourites (buying NO at the bid) as a maker. It was found by looking, so it is a hypothesis, not a
+  result. It needs its own registration and a fresh sample (K9) before anything is built.
+- Not tested: KXINX at 6 hours out had no favourites (range buckets are spread out that early).
