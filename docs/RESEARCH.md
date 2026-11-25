@@ -667,3 +667,20 @@ than their price implied; CI = 95% bootstrap over events.
   2026-11-23; the 8 highest-volume markets in each.
 - **Bar (K2's plus the held-out check):** ¢ per fill > 0 with a 95% CI over events above zero, ≥ 100 fills, and the
   Aug–Nov fills > 0 on their own. Calibration on the fresh sample is also reported.
+
+## K9 result: selling index-hourly favourites: **FAIL (adverse selection)**
+Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events K7 never sampled.
+
+| series | window | favourites | won − mid | filled | ¢ per fill | 95% CI | ¢ if every order filled |
+|---|---|---|---|---|---|---|---|
+| S&P hourly | all | 1,066 | −0.2¢ | 946 | −3.33 | [−6.04, −0.37] | +2.49 |
+| Nasdaq hourly | all | 1,088 | −8.4¢ | 618 | −3.77 | [−7.28, −0.06] | +11.64 |
+| both | Mar–Jul | 1,297 | −4.3¢ | 866 | −3.84 | [−6.60, −0.82] | +7.40 |
+| both | Aug–Nov | 857 | −4.4¢ | 698 | −3.09 | [−6.23, +0.22] | +6.67 |
+
+- Nasdaq favourites are overpriced on fresh data too; the S&P effect did not repeat.
+- **But the sells that fill lose about 3.5¢ each.** A resting sell is taken when buyers push the price up, i.e. when
+  the index is moving toward that favourite. Unfilled orders would have won; filled ones lose. FAIL.
+- Lesson (same as B1's capacity finding): on Kalshi, a "price vs outcome" gap says little until the trade tape shows
+  who fills you and when. Taking the overpricing as a taker would pay the spread and the fee, which K1 showed is
+  worse.
