@@ -1,6 +1,6 @@
 # Project context: source of truth
 
-**Last updated: 2026-11-24 (first paper run filled; K2 and R4 results).** This file is the single source of truth for both trading bots. Read the raw version
+**Last updated: 2026-11-24 (v1 tagged; S1/S2, K6 results; K7/K8 running).** This file is the single source of truth for both trading bots. Read the raw version
 before answering: https://raw.githubusercontent.com/Milol0608/alpaca-trader/main/docs/PROJECT_CONTEXT.md.
 If anything said in chat contradicts this file, the file wins until it's updated. Ideas discussed in chat are
 proposals until they're written here.
@@ -16,6 +16,23 @@ proposals until they're written here.
   the future. A result that looks too good is treated as a bug until proven otherwise; that has happened twice.
 - No Anthropic or LLM API key: scoring and parsing are local (regex, statistics, small local models).
 - Keys live only in a local `.env` (gitignored) and GitHub secrets. Never paste keys in chat.
+
+## Version 1 (owner, 2026-11-24): the system as it runs today
+The owner named today's state **v1 of the whole trading system, both bots**. Git tag `v1` in both repos
+(kalshi-forecaster at 0b262d2, alpaca-trader at the commit that adds this section). Later changes are v1.x / v2
+and should say what they change against this list.
+
+| part | v1 behaviour |
+|---|---|
+| Kalshi hosting | GitHub Actions, hourly, triggered by cron-job.org; Neon Postgres. Paper/shadow only; live trading locked. |
+| Kalshi taker bot | `nbm-blend-v1` (NBM forecast blended with the market) on daily-high markets, $100 paper bankroll, ¼ Kelly, ≤5% per market, ≤10% per city-day, ≤25% open, 3¢ minimum edge, 30% kill switch. Rarely finds a trade. |
+| Kalshi maker bot | **B1** (K2): at 8pm local standard time the evening before, a 1-contract buy-YES at the best bid on daily-high buckets priced 65–95¢; fills checked against the real trade tape; held to settlement. ADR 0006. |
+| Kalshi settlement/report | Settles from any recorded result; report lists open positions and the B1 maker section. |
+| Alpaca bot | Momentum 12-1, top 20 of the 500 most-traded US stocks (> $5, ETFs excluded), equal weight, rebalanced on the first run of each month, weekdays 10:00 New York. $200 paper account. No stops or targets. |
+| Research | Pre-registered tests K1–K8, R1–R7, C1, S1–S2 in docs/RESEARCH.md. Survivors: B1 only (Kalshi). Nothing beats SPY risk-adjusted on stocks. |
+
+**Pending owner decisions at v1:** B1 at ¼ Kelly instead of 1 contract; 70/30 SPY/momentum as a second paper
+strategy; V1 gap logger (unmerged branch); K7/K8 screens in progress (results go to v1.x).
 
 ## Owner decisions (2026-11-24)
 - **The goal every test is judged against:** beat buy-and-hold SPY after costs, *risk-adjusted* (higher Sharpe),
