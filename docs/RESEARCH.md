@@ -618,3 +618,18 @@ Order size N per bid; we get min(N, 25% of the contracts that traded through our
   harvests; weather showed +5 to +15¢.
 - **Stage 2 (only for stage-1 passes, registered separately before running):** a B1-style maker replay on the trade
   tape, with the K2 bar plus the Aug–Nov held-out check.
+
+## K8. Polymarket US daily temperature: the same favourite bias? Registered 2026-11-24, before running
+- **Why:** B1 earns at most ~$40–60 a month on Kalshi, capped by volume. Polymarket US (CFTC-regulated, US API)
+  lists daily high/low temperature markets for several US cities, settled on the same NWS climate report. Makers
+  pay no fee there (docs.polymarket.us/fees: only takers pay Θ·p·(1−p); Θ = 0.095 at the lowest tier). A second
+  venue would be a second, separate volume ceiling.
+- **Data:** every closed `tc-temp-*` market (`/v1/markets?categories=climate&closed=true`, from Apr 2026). Price at
+  8pm local standard time the evening before (same as B1), from `/v1/price-history` with 1-minute points:
+  ask = `longPrice`, bid = 1 − `shortPrice`, last point at or before the decision. Outcome from
+  `/v1/markets/{slug}/settlement`. The meaning of 1 vs 0 is checked first: each city-day must settle exactly one
+  bucket to 1.
+- **Stage 1 bar (calibration, like K7):** favourites (mid 65–95¢) before 2026-08-01: outcome − mid ≥ +3¢, 95% CI
+  over city-days above zero, ≥ 200 favourites. Aug–Nov reported separately and must also be > 0.
+- **Stage 2 (only if stage 1 passes; needs the owner's OK to pull the exchange's daily time-and-sales CSVs):** a fill
+  replay. A trade printed below our bid means our bid would have filled (the "through" rule; the CSV has no side).
