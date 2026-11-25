@@ -757,3 +757,9 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   rounding to a whole cent is reported too).
 - **Pass:** on the 8 unseen cities' rows: net ≥ +2¢ with the event-bootstrap CI above zero, ≥ 200 buys, and positive
   in both halves (before / from 2026-10-01). Miami reported separately.
+
+## K12 result: taker buys of hourly temperature favourites: **FAIL**
+- 8 unseen cities: 1,086 buys, net **−0.91¢** after the taker fee (−1.56¢ with 1-contract rounding), CI [−2.83, +0.93];
+  both halves negative. Miami: +0.12¢, CI [−5.60, +5.21].
+- The +8¢ bias over the mid is real but sits inside the spread: half the spread plus the 0.07·p·(1−p) fee uses it
+  up. Makers get picked off (K11), takers pay too much (K12). No way in at our size.
