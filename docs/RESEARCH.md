@@ -352,3 +352,22 @@ evening-before rule rarely applies. **Don't add.**
 Branch `claude/v1-gap-logger-046ceb` (registered in 95593d6, logger in 0eacb7e, ADR 0007; not merged). One live
 snapshot: 519 matched games, best gap after fees −0.16¢, 0 qualifying. Read-only. Logging for 4 weeks needs the
 branch merged and the repo variable `GAP_LOGGER_ENABLED=true`, **pending owner decision**.
+
+---
+
+## R6. Momentum with weekly stop-losses and profit targets. Registered 2026-11-24, before running
+- **Why:** the owner asked for stop-losses, profit-taking and mid-month selling, checked weekly. Han, Zhou & Zhu
+  (2016) report that a stop-loss tames momentum crashes; other work finds stops mostly add cost. Profit targets
+  cut winners, which momentum relies on, so we expect them to hurt. Test before changing the paper account.
+- **Base rule (unchanged):** momentum 12-1, top 20, equal weight, re-ranked on the first trading day of each month.
+- **Weekly check (first trading day of each week, after the close; trade at the next open):** for each holding,
+  return since its entry close. **Stop:** sell if return ≤ −S. **Target:** sell if return ≥ +T. The freed money
+  buys the best-ranked stock (current 12-1 score) not held and not sold this month. A sold stock can't come back
+  until the next monthly re-rank. Holdings are not re-equal-weighted mid-month (weights drift with prices).
+- **Grid (all reported, 11 variants):** S ∈ {none, 10%, 15%} × T ∈ {none, 25%, 30%, adaptive}, minus none/none.
+  "Adaptive" is the owner's "25–30% depending on the swings": 30% for stocks whose 60-day volatility is above the
+  median of the 20 picks, 25% for the calmer half.
+- **Setup:** $200, 5 bps per side, Mar 2017 – now, plus the held-out window from 2023.
+- **Pass bar:** a variant passes only if, in **both** the full and the held-out window, its Sharpe beats plain
+  momentum **and** SPY, and its worst drop is under 35%. With 11 variants, one may beat momentum by luck, so a
+  single-window win isn't enough.
