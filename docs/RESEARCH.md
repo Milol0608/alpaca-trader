@@ -826,3 +826,11 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   than D2a on 2023+ (otherwise the news adds nothing). 2 models; both reported. One run, no tuning.
 - **Known weakness:** the title map is built from today's Wikipedia; a company whose article is newer just shows
   low or no views early. Accepted.
+
+## D2c result: stock decider with Wikipedia attention: **FAIL (both models)**
+- 604 of 606 companies matched (2 with no views); 89% of stock-months have the feature. GDELT still blocked.
+  - D2c ridge: 2019–22 Sharpe 0.52 / drop 64%; 2023+ 0.89 / 55%. $200 from 2019 → $1,071; from 2023 → $660.
+  - D2c trees: 0.49 / 62%; 0.90 / 53%. $1,004; $660.
+  - 70/30 SPY / D2c: 2023+ Sharpe 1.14 (ridge) and 1.12 (trees), drops 24–25%; still under SPY's 1.23 / 19%.
+- Attention helps a little on 2023+ (Sharpe +0.05 to +0.07 over D2a, the second part of the bar is met) but nowhere
+  near SPY, and the 2019–22 trees version got worse. Not a usable edge. Stock "deciders" are closed for now.

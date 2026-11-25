@@ -202,7 +202,8 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
   (−0.9¢). Gold, 15-min Bitcoin, index hourly, Polymarket US temperature and sports: fail or too few.
 - **D1 Kalshi decider (trained model, with/without forecasts): FAIL.** With forecasts it made $26.51 vs B1's $13.20
   on Aug–Nov at 1 contract, but its 95% range includes zero. B1 stays. Could be shadow-logged.
-- **D2 stock decider: D2a (no news) FAIL**, worse than plain momentum. **D2b (news) not run:** GDELT blocked us.
+- **D2 stock decider: D2a (no news) FAIL**, worse than plain momentum. **D2b (GDELT news) not run:** GDELT blocked
+  us. **D2c (Wikipedia page views as the news signal) FAIL:** a little better than D2a on 2023+, far under SPY.
 - **Strategy review v4:** Trading-bot/reports/Strategy review v4.xlsx (deciders, money, combinations, new markets).
 - **Strategy review workbook:** Trading-bot/reports/Strategy review.xlsx (all strategies, yearly and monthly).
 - **Next in the backlog:** the Kalshi liquidity rule, the tracked-portfolio cap, tennis as research only, and

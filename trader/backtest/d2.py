@@ -1,5 +1,5 @@
 """D2 (docs/RESEARCH.md): a trained decider that re-ranks the monthly top-40 momentum pool, with and without news.
-  uv run --with scikit-learn python -m trader.backtest.d2      (needs data/news/gdelt/ from trader.backtest.news_gdelt)
+  uv run --with scikit-learn python -m trader.backtest.d2 [--wiki]   (news from news_gdelt, or Wikipedia views from news_wiki)
 
 Walk-forward: each January the models are refitted on every earlier month whose next-month return is known, and pick
 that year's stocks. Predictions start 2019. Writes data/results/d2.json (stats, yearly returns, monthly returns)."""
@@ -7,6 +7,7 @@ that year's stocks. Predictions start 2019. Writes data/results/d2.json (stats, 
 from __future__ import annotations
 
 import json
+import sys
 import math
 from bisect import bisect_left
 from datetime import date, datetime, timedelta
@@ -142,13 +143,15 @@ def main() -> None:
     daily = load_bars(s.data_dir / "bars", "1Day").select("symbol", "t", "open", "close", "volume").collect()
     ctx = build_context(daily, universe, START - timedelta(days=400), date.today())
     e = set(load_etfs(s.etfs_file))
-    tbl = news_table(s.data_dir / "news" / "gdelt")
+    wiki = "--wiki" in sys.argv  # D2c: Wikipedia page views stand in for GDELT news (no tone)
+    tbl = news_table(s.data_dir / "news" / ("wiki" if wiki else "gdelt"))
     rows = panel(ctx, e, tbl)
-    have = sum(1 for r in rows if r["tone30"] == r["tone30"])
+    have = sum(1 for r in rows if r["lcount30"] == r["lcount30"])
     print(f"panel: {len(rows)} stock-months, news for {have} ({have / len(rows):.0%}); {len(tbl)} news files", flush=True)
     plans = {"SPY (benchmark)": st.buy_hold("SPY"), "momentum 12-1 (live paper)": st.momentum(e)}
     for kind in ("ridge", "trees"):
-        for label, feats in (("D2a no news", BASE), ("D2b with news", BASE + NEWS)):
+        news = ("D2c wiki attention", BASE + ["lcount30", "dlcount"]) if wiki else ("D2b with news", BASE + NEWS)
+        for label, feats in (("D2a no news", BASE), news):
             p = predict(rows, feats, kind)
             plans[f"{label} ({kind})"] = decider(p, rows)
     for k in [k for k in plans if k.startswith("D2")]:
@@ -174,7 +177,7 @@ def main() -> None:
         print(f"{k:<40}{a['sharpe']:>12.2f}{a['max_dd']:>6.0%}{b['sharpe']:>11.2f}{b['max_dd']:>6.0%}"
               f"{full['final']:>13.0f}{200 * b['final'] / b['deposited']:>13.0f}  {'' if k.startswith('SPY') else ('PASS' if ok else 'fail')}",
               flush=True)
-    json.dump(out, open(s.data_dir / "results" / "d2.json", "w"), default=float, indent=1)
+    json.dump(out, open(s.data_dir / "results" / ("d2_wiki.json" if wiki else "d2.json"), "w"), default=float, indent=1)
 
 
 if __name__ == "__main__":
