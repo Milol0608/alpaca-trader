@@ -763,3 +763,12 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   both halves negative. Miami: +0.12¢, CI [−5.60, +5.21].
 - The +8¢ bias over the mid is real but sits inside the spread: half the spread plus the 0.07·p·(1−p) fee uses it
   up. Makers get picked off (K11), takers pay too much (K12). No way in at our size.
+
+## K8 result: Polymarket US temperature: **NOT ENOUGH DATA, and nothing to chase**
+- All 6,853 closed markets (1,143 city-days, Apr–Nov 2026). Settlement 1 = YES confirmed (every city-day sums to 1).
+- Before Aug: 24 favourites, outcome − mid +2.5¢, CI [−14.7, +19.0]: too few. Aug–Nov: 66 favourites, −0.5¢,
+  CI [−11.0, +9.3].
+- Why so few: Polymarket US uses 1°F buckets (Kalshi 2°F), so the evening before, the leading bucket's median mid is
+  ~47¢ and only ~6% of city-days have one at 65¢+. B1's rule barely applies. A "leading bucket at any price" rule
+  would be new and post-hoc; given K11/K12 (bias real, eaten by spread or adverse selection), not worth the owner's
+  OK to pull the exchange's trade files.
