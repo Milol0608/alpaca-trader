@@ -684,3 +684,43 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
 - Lesson (same as B1's capacity finding): on Kalshi, a "price vs outcome" gap says little until the trade tape shows
   who fills you and when. Taking the overpricing as a taker would pay the spread and the fee, which K1 showed is
   worse.
+
+## K10 / D1 / D2. New markets, and a learned "decider" with and without news. Registered 2026-11-25, before running
+- **Why:** the owner asked for (a) more Kalshi and Polymarket markets, and (b) an "AI decider" that reads news and
+  picks bets and stocks, tested with and without the news, alone and in combinations, with money numbers.
+  There is no LLM API key (standing rule), so the decider is a **trained statistical model**. It is fitted only on
+  old data and judged once on newer data, like S1/S2.
+- **K10, new markets (stage 1, calibration only; same bar as K7).**
+  - Kalshi, picked by volume among recurring non-sports series not yet tested and with data: **KXTEMPMIAH** (hourly
+    Miami temperature, 30 min before close, 1-minute candles), **KXGOLDD** (daily gold, 6 h before close, hourly
+    candles), **KXBTC15M** (15-minute Bitcoin up/down, 5 min before close, 1-minute candles).
+  - Polymarket US: the 3 recurring non-temperature series with the most closed markets, chosen from the market list
+    before any prices are pulled; price 6 h before close (or 30 min for markets shorter than a day).
+  - Bar: favourites (mid 65–95¢) on events before 2026-08-01: outcome − mid ≥ +3¢, 95% CI over events above zero,
+    ≥ 200 favourites. Aug–Nov reported separately. Passes would get a stage-2 fill replay, registered separately.
+- **D1, Kalshi decider (daily-high weather, the only market with tapes and an edge).**
+  - Candidates: every daily-high market at 8pm the evening before with a trade tape (mid 5–20¢: buy NO at 1 − ask;
+    mid 65–95¢: buy YES at the bid). Through-fills only, as K2.
+  - Three versions: **D1a** = the B1 rule (no model, baseline). **D1b** = model on market data only (log-odds of the
+    mid, spread, city, month). **D1c** = D1b plus the "news" for weather: the GFS and ECMWF forecasts available at
+    8pm (their mean and spread turned into a probability for the bucket, with each city's bias and error size
+    measured on 2024–Feb 2026 only).
+  - Models (settings fixed now, no tuning): logistic regression (C = 1) and gradient-boosted trees (depth 3, 200
+    rounds, learning rate 0.05). Fitted on every daily-high market with an 8pm price dated before 2026-08-01.
+  - Rule: bet when the model's edge over our price is ≥ θ, θ ∈ {0, 2, 4, 6}¢. θ and the model type are chosen on
+    Mar–Jul 2026 fills (most profit with ≥ 100 fills), then judged once on Aug–Nov 2026.
+  - Pass: on Aug–Nov, ¢/fill > 0 with the event-bootstrap 95% CI above zero, **and** more total profit at one
+    contract than D1a (B1) on the same months. Money: $100, one contract and the S1 ¼-Kelly sizing.
+- **D2, Alpaca decider (stocks).**
+  - Each month, re-rank the 40 top momentum stocks (the R7 pool) and hold the 20 the model likes best.
+  - **D2a** without news: 12-1, 6-1 and 1-month returns, 126-day volatility, distance to the 52-week high, log
+    dollar volume. **D2b** with news: plus GDELT news for the company (average tone over the last 30 days, log
+    article count over 30 days, and both changes vs the 90 days before). Only news dated before the rebalance day.
+    Company names come from SEC's ticker file; ambiguous names (e.g. "Target", "Apple") add noise, and that is
+    accepted, not hand-fixed.
+  - Target: next month's return minus the pool's median. Ridge regression (alpha 10) and gradient-boosted trees (as
+    D1). Walk-forward: refit each January on all earlier months; predictions start 2019.
+  - Pass (same as S2): Sharpe above SPY's and worst drop under 35% on 2019–2022, then again on 2023–now.
+    Pairs: 70/30 SPY / decider. $200, 5 bps per side.
+- **Count of tries:** K10 6 series; D1 2 models × 2 feature sets × 4 θ; D2 2 models × 2 feature sets. Everything is
+  reported, including the losers.
