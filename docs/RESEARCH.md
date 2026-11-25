@@ -654,3 +654,16 @@ than their price implied; CI = 95% bootstrap over events.
   *selling* favourites (buying NO at the bid) as a maker. It was found by looking, so it is a hypothesis, not a
   result. It needs its own registration and a fresh sample (K9) before anything is built.
 - Not tested: KXINX at 6 hours out had no favourites (range buckets are spread out that early).
+
+## K9. Sell overpriced favourites on S&P/Nasdaq hourly (maker). Registered 2026-11-24, before running
+- **Why:** K7 saw index-hourly favourites win less often than priced (S&P −3.9¢/−6.7¢, Nasdaq −14.5¢/−6.6¢). That was
+  found by looking, so this test uses **only events K7 did not sample**.
+- **Series:** KXINXU, KXNASDAQ100U (maker fee 0, `fee_type: quadratic`).
+- **Rule:** 30 minutes before close, for each market with YES mid in [65¢, 95¢), post a **sell-YES at the best ask**
+  (= buy NO). 1 contract, held to settlement. P&L per contract = ask − outcome.
+- **Fills (conservative "through"):** a later trade before close where a taker bought YES above our ask
+  (`taker_outcome_side == "yes"`, price > ask). Trade tape from the decision time to the close.
+- **Sample:** per series, 300 fresh events closing 2026-03-01 to 2026-07-31 and 200 fresh events 2026-08-01 to
+  2026-11-23; the 8 highest-volume markets in each.
+- **Bar (K2's plus the held-out check):** ¢ per fill > 0 with a 95% CI over events above zero, ≥ 100 fills, and the
+  Aug–Nov fills > 0 on their own. Calibration on the fresh sample is also reported.
