@@ -738,3 +738,22 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   one contract, through-fills on the real trade tape. Pass: ¢/fill > 0 with the event-bootstrap CI above zero,
   ≥ 100 fills, and positive in both halves (events before and after 2026-10-01). Stage 2 is reported whatever stage 1
   says, but only counts if stage 1 passes.
+
+## K11 result: hourly temperature: **favourites ARE underpriced (stage 1 PASS), but resting bids lose (stage 2 FAIL)**
+- Stage 1, 8 cities the K10 screen never saw (960 events): 1,184 favourites, outcome − mid **+8.22¢**, CI
+  [+6.21, +10.13]. Every city positive (+2.5 to +12.4¢).
+- Stage 2, B1-style resting bids, 9 series: 1,328 posted, 431 filled, **−4.96¢/fill**, CI [−9.60, −0.73], −$21.37
+  at one contract. Halves: before Oct −8.58¢ (305), Oct–Nov +3.81¢ (126). If every bid had filled: +16.53¢.
+- Same story as K9 and B1's capacity curve, stronger: the bids that fill are the ones the market is moving away from.
+
+## K12. Hourly temperature favourites bought at the ask (taker). Registered 2026-11-25, before running
+- **Why:** K11 shows the bias is large (+8¢ over the mid) but maker bids are picked off. Paying the ask avoids
+  adverse selection (we always fill) at the price of half the spread plus Kalshi's taker fee
+  (fee schedule, effective 2026-07-07: round up(0.07 × C × P × (1 − P)); temperature series are standard).
+- **Honest caveat:** this rule was thought of after seeing K11's data, and it is scored on the same rows. A pass only
+  earns a forward paper test; no money is moved on it.
+- **Rule:** 30 min before close, for every market with mid 65–95¢, buy YES at the ask; hold to settlement.
+  Net per contract = outcome − ask − 0.07 × ask × (1 − ask) (10-contract lots, so rounding is ignored; 1-contract
+  rounding to a whole cent is reported too).
+- **Pass:** on the 8 unseen cities' rows: net ≥ +2¢ with the event-bootstrap CI above zero, ≥ 200 buys, and positive
+  in both halves (before / from 2026-10-01). Miami reported separately.
