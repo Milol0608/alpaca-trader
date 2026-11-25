@@ -558,3 +558,15 @@ Run with `uv run python -m trader.backtest.s2`. Train Mar 2017 – Dec 2022, tes
 - Resampled 5 years from $200 (median / bad case p10): SPY $394 / $263; M70 $483 / $282; momentum $647 / $226.
 - **Verdict:** no change to the paper account is justified by the bar. If the owner wants a smoother paper account,
   M70 is the candidate to *register for forward paper testing*, not to adopt.
+
+## K6. B1 favourites rule at 8am instead of 8pm. Registered 2026-11-24, before running
+- **Why:** the owner asked. At 8am on the market's own day, forecasts are sharper, so the favourite-longshot gap may
+  be smaller (more informed prices), or bigger (more trading, more retail flow). K1 found the bias at both times.
+- **Rule, unchanged except the time:** at 8am local standard time on the market's day, for each daily-high bucket
+  with YES mid in [65¢, 95¢), post a buy-YES at the best bid. 1 contract, held to settlement. Price from Kalshi's
+  hourly candlesticks (the K1 "am" snapshot).
+- **Data:** every daily-high market from 2026-03-01 (K2's test period). The trade tape from 8am to close comes from the
+  existing K2 download where available (it starts at 8pm the evening before), and from a new download otherwise.
+- **Fills, bar:** same as K2. Conservative fills, ¢ > 0 with the 95% CI over city-days above zero, Jul–Nov > 0,
+  ≥ 100 fills. **Plus the S1 held-out check:** the Aug–Nov edge must also be > 0.
+- **Also reported:** the overlap with the 8pm rule (markets both would buy), and 8am + 8pm together.
