@@ -416,3 +416,22 @@ Run with `uv run python -m trader.backtest.r6`, $200, 5 bps per side.
   plain momentum and SPY in both windows with a worst drop under 35%.
 - **Forward, separate from this test:** live headline news (Alpaca, from Apr 2026) could be logged and scored for the
   paper holdings. That evidence would take many months to build up.
+
+## R7 result: filings-based news score: **FAIL (both variants)**
+Run with `uv run python -m trader.backtest.r7`. EDGAR mapped 606 of 646 candidate symbols; 71,115 8-Ks since 2015,
+13,876 of them with a red-flag item (5.02, 4.01, 4.02).
+
+| | $200 → full | Sharpe | worst drop | held-out CAGR | held-out Sharpe | held-out worst drop |
+|---|---|---|---|---|---|---|
+| SPY | $699 | **0.80** | 34% | 19.4% | **1.23** | 19% |
+| momentum 12-1 | **$1,535** | 0.69 | 60% | 37.7% | 0.87 | 57% |
+| R7a news-confirmed | $1,376 | 0.68 | 59% | 29.2% | 0.76 | 59% |
+| R7b red-flag filter | $1,268 | 0.66 | 61% | **38.3%** | 0.91 | 55% |
+
+- Neither beats SPY's Sharpe in either window, and both keep momentum's ~60% worst drop. **FAIL.**
+- R7b is slightly better than momentum since 2023 (0.91 vs 0.87) but worse over the full period. That's noise, not
+  an edge. Executive exits (item 5.02) are routine at big companies, so the filter mostly skips good stocks.
+- **Caveat:** 82 mapped companies file no 8-Ks at all (mostly foreign issuers, which file 6-Ks), so R7a counted
+  them as "no news" rather than "unknown". It's a small share of the pool and doesn't change the verdict.
+- **Verdict:** filing counts and red flags don't improve momentum. A real headline-news scorer can only be judged
+  forward (Alpaca news starts Apr 2026), so it would need months of logging before it means anything.

@@ -174,6 +174,9 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
   branches are unmerged.
 - **V1 Kalshi vs Polymarket US gap logger:** built and off by default, on an unmerged branch. First snapshot: 0
   qualifying gaps out of 519 games. Enabling 4 weeks of logging is pending an owner decision.
+- **R6 stop-losses / profit targets (weekly, 10–15% stops, 25–30% targets): FAIL**, all 11 variants below plain
+  momentum and SPY. **R7 SEC-filings news score: FAIL.** Monthly momentum stays unchanged on paper.
+- **Strategy review workbook:** Trading-bot/reports/Strategy review.xlsx (all strategies, yearly and monthly).
 - **Next in the backlog:** the Kalshi liquidity rule, the tracked-portfolio cap, tennis as research only, and
   possibly a long-short momentum test (needs a $2k margin account).
 
