@@ -813,3 +813,16 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
 - Bar for when it does run: D2b must beat plain momentum, not just D2a (D2a lost to momentum in both periods).
 - Options: retry GDELT later from this machine (news_gdelt.py resumes), or the owner OKs a contact address for
   Wikimedia page views as a substitute "attention" signal (a separate pre-registration).
+
+## D2c. Stock decider with Wikipedia attention (news substitute). Registered 2026-11-25, before running
+- **Why:** GDELT still refuses this machine (429 again at 14:42). The owner said: retry GDELT, and if it fails use
+  Wikimedia. Wikipedia page views are a documented attention signal (e.g. Moat et al. 2013); there is no tone.
+- **Data:** for each of the 606 named pool stocks, the top English Wikipedia search hit for the cleaned SEC company
+  name (same cleaning as GDELT; ambiguous hits are accepted, not hand-fixed), then daily user page views
+  2017-01-01 → now. Request header carries the public repo URL as contact, not the owner's email.
+- **Features (added to D2a's six):** log of page views over the last 30 days, and its change vs the 90 days before
+  (monthly rate). Only views dated before the rebalance day. Same models, same walk-forward, same costs as D2.
+- **Pass:** the D2 bar (Sharpe above SPY and worst drop < 35% on 2019–22 and again on 2023+), **and** better Sharpe
+  than D2a on 2023+ (otherwise the news adds nothing). 2 models; both reported. One run, no tuning.
+- **Known weakness:** the title map is built from today's Wikipedia; a company whose article is newer just shows
+  low or no views early. Accepted.
