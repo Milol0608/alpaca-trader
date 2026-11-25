@@ -503,3 +503,30 @@ SPY over the same windows: +1.3% (Mar–Nov) to +7.1% (Dec–Nov), worst drop ab
 - **Setup:** $200, 5 bps per side (ETFs), monthly. Train 2017-03 to 2022-12, test 2023-01 to now.
 - **Pass bar:** Sharpe above SPY's **and** worst drop under 35% in train, then the same again on test. Block
   bootstrap (3-month blocks) gives the range of outcomes for anything that passes.
+
+## S1 result: Kalshi bet sizing: **B1 highs PASS (sizing helps); lows, TSA and gas FAIL; lows' edge is gone since August**
+Script: session scratchpad `s1_sizing.py`. Train ends 2026-07-31; test is 2026-08-01 to 2026-11-23 (18 weeks).
+"12-month" figures are from 2,000 resampled years of train weeks; "test real" is the actual Aug–Nov path from $100.
+
+| rule set | train edge (lower bound) | test edge | choice | train 12-mo p10 / median | test real $100 → (worst drop) | verdict |
+|---|---|---|---|---|---|---|
+| B1 highs | +11.8¢ (+3.4¢) | **+4.7¢** | ½ Kelly, no cap, no pause | $285 / $590 | **$181.74** (21%) | **PASS** |
+| B1 highs, baseline | | | 1 contract | $121 / $131 | $112.22 (2%) | PASS |
+| K3 lows | +7.5¢ (+2.4¢) | **−0.4¢** | 2%, 10% daily cap | $110 / $139 | $92.54 (22%) | FAIL |
+| K3 lows, baseline | | | 1 contract | $108 / $119 | $99.27 (8%) | FAIL |
+| K4 TSA | −0.3¢ (−22¢) | | no bets (Kelly = 0) | $100 | $100 | FAIL |
+| K5 gas | +7.6¢ (−10¢) | | 3%, 10% cap | $102 / $121 | $93.05 (11%) | FAIL |
+| B1 + K3 | +8.6¢ (+3.9¢) | +2.7¢ | 3%, 25% cap | $212 / $340 | $115.55 (24%) | PASS (B1 carries it) |
+| B1 + K3 + K5 | +8.5¢ (+3.5¢) | | 3%, 10% cap | $213 / $347 | $107.38 (27%) | PASS (barely) |
+
+- **B1 is the only real survivor.** Its edge fell from +11.8¢ (Mar–Jul) to +4.7¢ (Aug–Nov) but stayed positive,
+  and bigger bets still paid: ½ Kelly turned $100 into $182 in 18 weeks, with a 21% worst drop.
+- **Lows' edge vanished in the test window** (−0.4¢ on 168 fills). K3's earlier PASS rested on Dec–Jul.
+  **Withdraw the recommendation to add lows to the live bot.** Adding lows or gas to B1 only dilutes it.
+- **No plateau, a warning:** for B1 the train result rises steadily with bet size, so the choice sits at the edge of
+  the grid (½ Kelly). That's driven by a train edge that later halved. ½ Kelly bets up to ~17% of the bankroll on
+  one 90¢ favourite.
+- **Pauses and daily caps never helped** B1 in train (the chosen config uses neither).
+- **For the paper bot:** move from 1 contract to **¼ Kelly** (train p10 $182, median $280), not ½. The pre-registered
+  choice passed, but with the edge already halved, the smaller size is the prudent first step. Re-check after 100
+  live fills.
