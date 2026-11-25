@@ -602,3 +602,19 @@ Order size N per bid; we get min(N, 25% of the contracts that traded through our
 - **So B1 is worth about $40–60 a month at most, whatever the bankroll.** About $300–500 of Kalshi bankroll is
   enough to reach that. Bigger bankrolls don't earn more from B1. Kelly sizing is fine while it stays under ~20
   contracts per bid.
+
+## K7. Favourite bias screen on Kalshi's biggest fee-free, fast-settling series. Registered 2026-11-24, before running
+- **Why:** B1 is real but capped at ~$40–60 a month. The owner wants more edges of the same kind. A scan of all
+  16,934 Kalshi series (2026-11-24) shows 16,771 charge makers nothing (`fee_type: quadratic`). The fast-settling
+  volume sits in crypto, index, oil and rain series, not weather. Sports stay research-only (standing rule).
+- **Series (7):** KXBTCD (Bitcoin hourly above/below), KXETHD (Ethereum hourly), KXINXU (S&P 500 hourly),
+  KXNASDAQ100U (Nasdaq hourly), KXINX (S&P 500 daily range), KXWTI (WTI oil daily), KXRAIN (daily rain).
+- **Decision time (fixed now):** hourly series 30 minutes before close (1-minute candles); daily series 6 hours
+  before close (hourly candles). Price = the last candle ending at or before that time.
+- **Sample:** markets closing 2026-03-01 to 2026-11-23. Per series, 200 random events closing before 2026-08-01
+  (train) and 150 after (test). In each event, the 12 markets with the most volume.
+- **Stage 1, calibration (no fills):** favourites = YES mid in [65¢, 95¢). Passes if, on train events, outcome minus
+  mid is ≥ +3¢ with a 95% bootstrap CI (over events) above zero and at least 200 favourites. This is the bias B1
+  harvests; weather showed +5 to +15¢.
+- **Stage 2 (only for stage-1 passes, registered separately before running):** a B1-style maker replay on the trade
+  tape, with the K2 bar plus the Aug–Nov held-out check.
