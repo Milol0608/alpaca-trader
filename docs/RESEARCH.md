@@ -724,3 +724,17 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
     Pairs: 70/30 SPY / decider. $200, 5 bps per side.
 - **Count of tries:** K10 6 series; D1 2 models × 2 feature sets × 4 θ; D2 2 models × 2 feature sets. Everything is
   reported, including the losers.
+
+## K11. Hourly temperature favourites: confirm on other cities, then replay fills. Registered 2026-11-25, before running
+- **Why:** K10 found Miami hourly temperature favourites (KXTEMPMIAH, 30 min before close) won +6.2¢ over their mid
+  on Aug–Nov (144 favourites, CI [+1.0, +11.2]). The series only starts in August, so K10's train bar can't be met,
+  and Miami was picked from a screen, so its number is optimistic. This checks it on data the screen never saw.
+- **Stage 1 (independent confirmation, calibration):** the other hourly temperature series with volume — KXTEMPNYCH,
+  KXTEMPNYCHS, KXTEMPLAXH, KXTEMPLAXHS, KXTEMPCHIH, KXTEMPCHIHS, KXTEMPAUSH, KXTEMPDCH. Up to 120 random events
+  each (all dates they exist, to 2026-11-23), 8 highest-volume markets per event, price 30 min before close
+  (1-minute candles). Pass: pooled favourites (mid 65–95¢) outcome − mid ≥ +3¢, 95% CI over events above zero,
+  ≥ 200 favourites.
+- **Stage 2 (fills, B1-style, all 9 series incl. Miami):** buy YES at the bid 30 min before close, held to settlement,
+  one contract, through-fills on the real trade tape. Pass: ¢/fill > 0 with the event-bootstrap CI above zero,
+  ≥ 100 fills, and positive in both halves (events before and after 2026-10-01). Stage 2 is reported whatever stage 1
+  says, but only counts if stage 1 passes.
