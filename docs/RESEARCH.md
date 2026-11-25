@@ -319,3 +319,36 @@ Run with `uv run python -m trader.backtest.crypto_trend` (Coinbase daily candles
 - **Pass bar (same as K2):** conservative-fill P&L > 0 with a 95% bootstrap CI over city-days above zero, **and**
   positive in Jul–Nov 2026 on its own. At least 100 fills, or the result is "not enough data", not a pass.
 - **Also reported, not part of the bar:** the same rule as a taker (buy at the ask, pay the fee).
+
+## K3 result: favorites rule on daily LOWS: **PASS**
+Run with `uv run python -m app.backtest.lows` (Trading-bot) on 2026-11-24: 35,026 daily-low markets, 34,473 priced,
+583 in the favorite zone with a trade tape. Cents are per contract; the CI is a 95% bootstrap over city-days.
+
+| fill rule | posted | filled | ¢/fill | 95% CI | Jul–Nov ¢ (n) | total, 1 contract |
+|---|---|---|---|---|---|---|
+| **through (conservative)** | 583 | 416 (71%) | **+5.47** | **[+1.80, +9.28]** | **+2.05** (257) | $22.76 |
+| touch (optimistic) | 583 | 459 (79%) | +6.78 | [+3.28, +10.22] | +3.86 (283) | $31.11 |
+
+- **Bar:** P&L > 0 with the CI above zero ✔; Jul–Nov positive ✔; 416 fills ≥ 100 ✔. **PASS.**
+- If every order had filled: +11.09¢. So adverse selection eats about half the edge, more than in highs (a quarter).
+  Taker at the ask plus fee: +1.78¢ (not part of the bar).
+- **The edge is shrinking.** Won-minus-mid by month: +9 to +16¢ from Mar to Jun 2026, then +4, +14, +2, +2 and +5¢
+  for Jul to Nov. Jul–Nov passes, but only at +2¢ per fill. Live results must be watched for decay.
+- Fill rate is 71%, lower than highs' 89%. Capacity is similar: about 1.5 fills a day.
+- **Verdict:** eligible to join the live maker shadow (ADR 0006's slot) as a second series family, **pending owner
+  approval**, with the same review after about 100 fills.
+
+## K4 result: favorites rule on TSA weekly checkpoints (KXTSAW): **NOT ENOUGH DATA**
+From the side session's branch `claude/k4-tsa-maker-aad47a` (registered in a1c1af0 at 10:12, results in 697c7df at
+16:48; not merged). 31 conservative fills against a bar of 100. −0.3¢ per fill, CI [−16, +12], Jul–Nov −4.2¢. It
+leans negative and the market is too thin to ever reach 100 fills quickly. **Don't add.**
+
+## K5 result: favorites rule on daily/weekly gas prices: **NOT ENOUGH DATA**
+From branch `claude/k5-gas-maker-596e39` (registered in dff0841 at 10:13, results in d193ac8 at 11:10; not merged).
+54 fills, +1.2¢, CI [−11.4, +14.4], Jul–Nov −13.9¢. Daily gas markets open on their own close day, so the
+evening-before rule rarely applies. **Don't add.**
+
+## V1. Kalshi vs Polymarket US gap logger: built, off by default
+Branch `claude/v1-gap-logger-046ceb` (registered in 95593d6, logger in 0eacb7e, ADR 0007; not merged). One live
+snapshot: 519 matched games, best gap after fees −0.16¢, 0 qualifying. Read-only. Logging for 4 weeks needs the
+branch merged and the repo variable `GAP_LOGGER_ENABLED=true`, **pending owner decision**.

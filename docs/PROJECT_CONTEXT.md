@@ -168,8 +168,14 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
   - **Skip:** taker strategies, cheap longshots, crypto day trading, overnight/turn-of-month/PEAD/dividend capture,
     matched betting, CME weather and live tennis.
   - **Base rate:** most retail traders lose (82–84% of Polymarket wallets; 97% of persistent Brazilian day traders).
-- **Next in the backlog:** daily low temperature (Kalshi, maker only), a read-only Kalshi vs Polymarket US gap
-  logger, the TSA nowcast, the Kalshi liquidity rule, the tracked-portfolio cap, and tennis as research only.
+- **K3 daily lows, favorites maker rule: PASS** (416 fills, +5.47¢, CI [+1.80, +9.28], Jul–Nov +2.05¢). The edge
+  is shrinking month to month. It can join the live maker shadow, **pending owner approval**.
+- **K4 TSA and K5 gas, same rule: NOT ENOUGH DATA** (31 and 54 fills, both negative since July). Don't add. Both
+  branches are unmerged.
+- **V1 Kalshi vs Polymarket US gap logger:** built and off by default, on an unmerged branch. First snapshot: 0
+  qualifying gaps out of 519 games. Enabling 4 weeks of logging is pending an owner decision.
+- **Next in the backlog:** the Kalshi liquidity rule, the tracked-portfolio cap, tennis as research only, and
+  possibly a long-short momentum test (needs a $2k margin account).
 
 ## How to use this in a phone chat
 Discuss and explore ideas, questions and trade-offs. Anything decided should be written back into this file (via the
