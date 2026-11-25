@@ -1,6 +1,6 @@
 # Project context: source of truth
 
-**Last updated: 2026-11-24 (v1 tagged; S1/S2, K6 results; K7/K8 running).** This file is the single source of truth for both trading bots. Read the raw version
+**Last updated: 2026-11-25 (K7–K12, D1/D2 deciders; nothing new passes).** This file is the single source of truth for both trading bots. Read the raw version
 before answering: https://raw.githubusercontent.com/Milol0608/alpaca-trader/main/docs/PROJECT_CONTEXT.md.
 If anything said in chat contradicts this file, the file wins until it's updated. Ideas discussed in chat are
 proposals until they're written here.
@@ -197,6 +197,13 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
   +11.8¢). Lows' edge is **gone since August** (−0.4¢), so the earlier "add lows" proposal is withdrawn. Recommended
   next paper step: B1 at ¼ Kelly instead of 1 contract, re-checked after 100 fills. Needs owner approval.
 - **S2 Alpaca portfolio rules:** all fail. 70/30 SPY/momentum is closest (full Sharpe 0.81 vs 0.80, drop 36%).
+- **K7–K12 new markets (2026-11-25):** favourites are underpriced on Kalshi hourly temperature too (+8.2¢ on 8
+  unseen cities, PASS), but resting bids lose (−5.0¢/fill, adverse selection) and buying at the ask loses after fee
+  (−0.9¢). Gold, 15-min Bitcoin, index hourly, Polymarket US temperature and sports: fail or too few.
+- **D1 Kalshi decider (trained model, with/without forecasts): FAIL.** With forecasts it made $26.51 vs B1's $13.20
+  on Aug–Nov at 1 contract, but its 95% range includes zero. B1 stays. Could be shadow-logged.
+- **D2 stock decider: D2a (no news) FAIL**, worse than plain momentum. **D2b (news) not run:** GDELT blocked us.
+- **Strategy review v4:** Trading-bot/reports/Strategy review v4.xlsx (deciders, money, combinations, new markets).
 - **Strategy review workbook:** Trading-bot/reports/Strategy review.xlsx (all strategies, yearly and monthly).
 - **Next in the backlog:** the Kalshi liquidity rule, the tracked-portfolio cap, tennis as research only, and
   possibly a long-short momentum test (needs a $2k margin account).

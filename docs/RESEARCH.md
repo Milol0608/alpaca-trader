@@ -804,3 +804,12 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
     momentum) 0.76 / 36%; 1.11 / 26%.
 - The model re-ranking is worse than plain momentum in both periods: it learns nothing the 12-1 ranking doesn't
   already have, and it adds turnover. The pairs are closest to SPY but under it on 2023+ Sharpe.
+
+## D2b: stock decider with news: **NOT RUN (no news data)**
+- GDELT's free API rate-blocked this IP (HTTP 429) from ~01:45 to 07:05 on 2026-11-25. One short probe got through
+  at 06:10, but the full 2017–2026 queries were refused 10 times in 45 min; 0 of 606 companies downloaded.
+- Alpaca's news only starts 2026-04-29 (too short to test). Wikimedia page-views need a contact address in the
+  request header, which needs the owner's OK.
+- Bar for when it does run: D2b must beat plain momentum, not just D2a (D2a lost to momentum in both periods).
+- Options: retry GDELT later from this machine (news_gdelt.py resumes), or the owner OKs a contact address for
+  Wikimedia page views as a substitute "attention" signal (a separate pre-registration).
