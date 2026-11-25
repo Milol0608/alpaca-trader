@@ -463,3 +463,43 @@ SPY over the same windows: +1.3% (Mar–Nov) to +7.1% (Dec–Nov), worst drop ab
 - The projections spreadsheet's "5% stake" plan was built on highs alone. With lows added, 2% is the most we'd use,
   and sizing should get its own pre-registered test before the live bot bets more than 1 contract.
 - V1 can't be simulated: no Polymarket US price history, and the one live check found 0 qualifying gaps.
+
+---
+
+## S1. Kalshi bet sizing and pauses, chosen on old data, judged on new. Registered 2026-11-24, before running
+- **Why:** the simulation above showed bet size decides whether a real edge makes or loses money. The owner wants a
+  "decider" for amounts and stops. This tests one without overfitting.
+- **Rule sets:** B1 highs (K2), K3 lows, K4 TSA, K5 gas, B1+K3, B1+K3+K5. Conservative ("through") fills only.
+- **Split:** choose on fills before 2026-08-01 (train); judge once on 2026-08-01 to 2026-11-23 (test). No re-tuning.
+- **Grid (216 per rule set):**
+  - size: 1 contract; 1%, 2%, 3% of bankroll per bid; ¼ and ½ Kelly. Kelly uses the train edge at its lower 95%
+    bound: f = edge / (1 − price); no bets if that bound ≤ 0.
+  - daily spend cap: 10%, 25%, 100% of bankroll.
+  - pause: none, or no bids for 14 days once the bankroll is ≥ 20% below its peak (the peak resets after).
+  - Always: a bid ≤ 25% of the contracts that traded through our price, ≤ 500 contracts, whole contracts.
+- **Simulation:** 2,000 paths of 52 weeks, each built by resampling whole weeks of train fills. Stress: the same with
+  every outcome cut by half the train edge per contract.
+- **Choice (per rule set):** highest 10th-percentile 12-month bankroll, among configs whose median worst drop is under
+  35% and whose half-edge median ends at or above $100. Neighbours of the choice are reported (plateau check).
+- **Final exam:** the chosen config, run on the real Aug–Nov path from $100 and on 2,000 resampled test paths.
+  Passes if the real path ends above $100 with a worst drop under 35% **and** the test median ends above $100.
+  1 contract is always reported as the baseline. 216 configs were tried per rule set, so the choice's train numbers
+  are optimistic by construction.
+
+## S2. Alpaca portfolio rules, chosen on 2017–2022, judged on 2023–2026. Registered 2026-11-24, before running
+- **Why:** add-ons to single-stock momentum keep failing. These are the best-documented portfolio-level ideas not yet
+  tested. Each has fixed settings from its paper or from a stated reason, so there's nothing to tune.
+- **Single rules:**
+  - **V: volatility-scaled momentum** (Barroso & Santa-Clara 2015): top-20 momentum, scaled by min(1, 20% /
+    the picks' 126-day realised volatility); the rest in cash. 20% ≈ SPY's own volatility.
+  - **D: dual momentum** (Antonacci): hold SPY or EFA, whichever rose more over 12 months, if it beat SHY; else AGG.
+  - **S: sector momentum:** the top 3 of the 11 sector ETFs by 12-1 return; a slot with a negative 12-month return
+    goes to SHY.
+  - **H: 52-week-high momentum** (George & Hwang 2004): the 20 stocks closest to their 1-year high.
+  - **M70 / M50:** 70/30 and 50/50 SPY / momentum, rebalanced monthly.
+  - **P: drawdown pause:** momentum, but hold SPY in any month that starts with always-on momentum more than 25%
+    below its peak.
+- **Pairs (only natural ones):** V with SPY instead of cash; 70/30 SPY / V; P applied to V.
+- **Setup:** $200, 5 bps per side (ETFs), monthly. Train 2017-03 to 2022-12, test 2023-01 to now.
+- **Pass bar:** Sharpe above SPY's **and** worst drop under 35% in train, then the same again on test. Block
+  bootstrap (3-month blocks) gives the range of outcomes for anything that passes.
