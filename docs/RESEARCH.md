@@ -389,10 +389,30 @@ Run with `uv run python -m trader.backtest.r6`, $200, 5 bps per side.
 
 - **No variant beats plain momentum or SPY on Sharpe in either window, and every worst drop is 48–63%.** FAIL.
 - **Stops** sell at the bottom of short dips that momentum stocks often recover from. With a weekly check, a
-  "10% stop" often fills at −15% or worse. A 10% stop cost about $400 of the final $1,535.
+  "10% stop" can sell well below −10% (how far below wasn't measured). A 10% stop cost about $400 of the final $1,535.
 - **Targets** cut the big winners that carry momentum (2025: +74% plain vs +60–97% with targets, but 2024: +59% vs
   +38–48%). They also double or triple the trade count.
 - **Control check:** the R6 code with no stop and no target ends at $1,595 (2,545 trades) vs momentum's $1,535
   (2,535). The small gap is one difference: R6 skips a stock with no price that day. The control is slightly
   *better* than plain momentum, so every variant also loses to its own control.
 - **Verdict:** don't add stops or profit targets. Monthly momentum stays as it is on the paper account.
+
+## R7. A filings-based "news" score on momentum picks. Registered 2026-11-24, before running
+- **Why:** the owner asked for a scorer that reads company news and decides whether a stock is good enough to buy
+  or should be dropped. Alpaca's news feed only goes back to 2026-04-29 (checked: zero AAPL/NVDA articles before),
+  so headline news can't be backtested. SEC 8-K filings (companies' required "current reports") go back to 2001,
+  free. Each one carries item codes: 2.02 results, 5.02 officer/director changes, 4.01/4.02 auditor change or
+  restatement, and so on. No LLM: the score is item counts and flags.
+- **Evidence:** Chan (2003): stocks that moved *with* news keep drifting; big moves *without* news tend to reverse.
+- **Data:** EDGAR `company_tickers.json` (ticker → CIK) and `submissions/CIK*.json` for every stock that was ever
+  in the monthly momentum top 40. Tickers that EDGAR can't map (often delisted) count as "unknown", not "no news",
+  and are kept in their momentum order.
+- **R7a, news-confirmed momentum:** each month, take the top 40 by 12-1 momentum. Score each by the number of 8-Ks
+  filed during its formation window (12 to 1 months ago). Hold the 20 with the most filings (ties and unknowns
+  broken by momentum rank), equal weight.
+- **R7b, red-flag filter:** plain top 20, but skip any stock with an 8-K item 5.02, 4.01 or 4.02 filed in the last
+  30 days, taking the next-ranked stock instead.
+- **Setup and bar (as R1/R6):** $200, 5 bps, Mar 2017 – now plus held-out from 2023. Passes only if Sharpe beats
+  plain momentum and SPY in both windows with a worst drop under 35%.
+- **Forward, separate from this test:** live headline news (Alpaca, from Apr 2026) could be logged and scored for the
+  paper holdings. That evidence would take many months to build up.
