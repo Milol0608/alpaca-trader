@@ -772,3 +772,24 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   ~47¢ and only ~6% of city-days have one at 65¢+. B1's rule barely applies. A "leading bucket at any price" rule
   would be new and post-hoc; given K11/K12 (bias real, eaten by spread or adverse selection), not worth the owner's
   OK to pull the exchange's trade files.
+
+## K10 result: new markets: **nothing passes stage 1** (too few before Aug, or the wrong sign)
+- Kalshi (favourites, outcome − mid):
+  - KXTEMPMIAH: series starts after Aug, so 0 train favourites; Aug–Nov 144, **+6.2¢**, CI [+1.0, +11.2]. Not a
+    pass (no train data), but it led to K11, which confirmed the bias on 8 more cities and then failed on fills.
+  - KXGOLDD: train 198, **−9.5¢** (favourites overpriced); Aug–Nov −5.0¢.
+  - KXBTC15M: train 172, −0.6¢; Aug–Nov 107, +3.9¢, CI [−2.4, +10.0].
+- Polymarket US: recurring non-temperature markets are all sports games (cbb 1,484, nba 475, nhl 309 closed). Of
+  2,266 games screened, only 41 had a two-sided price 6 h before the end, all before Aug: cbb 20 at +1.9¢, nba 21
+  at −14.2¢. Too few; most games have no book until close to tip-off.
+
+## D1 result: Kalshi decider: **FAIL (all versions); D1c makes more dollars but its CI includes zero**
+- Aug–Nov 2026, through-fills, one contract:
+  - D1a (B1 rule): 261 fills, +5.06¢, CI [−0.38, +10.34], $13.20.
+  - D1b (trees on market data, θ = 2¢ chosen on Mar–Jul): 2,385 fills, +0.46¢, $11.08. FAIL.
+  - D1c (trees + GFS/ECMWF forecasts, θ = 2¢ chosen): 1,956 fills, +1.36¢, CI [−0.25, +2.88], $26.51. Beats D1a's
+    dollars, but the CI includes zero → FAIL by the registered bar.
+- $100 from Aug 1: B1 $113.20 (1 contract, worst drop 3%), $139.95 (¼ Kelly, 10%); D1b $110.27 / $110.64 (32%);
+  D1c $126.51 (7%) / $187.48 (28%).
+- Reading: the forecasts help (D1c ≫ D1b), but per-fill edge is a third of B1's; more trades, thinner, noisier.
+  Worth watching live as a shadow, not worth switching to.
