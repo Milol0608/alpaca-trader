@@ -371,3 +371,28 @@ branch merged and the repo variable `GAP_LOGGER_ENABLED=true`, **pending owner d
 - **Pass bar:** a variant passes only if, in **both** the full and the held-out window, its Sharpe beats plain
   momentum **and** SPY, and its worst drop is under 35%. With 11 variants, one may beat momentum by luck, so a
   single-window win isn't enough.
+
+## R6 result: weekly stop-losses and profit targets: **FAIL (all 11 variants)**
+Run with `uv run python -m trader.backtest.r6`, $200, 5 bps per side.
+
+| variant | $200 → full | Sharpe | worst drop | held-out CAGR | held-out Sharpe | held-out worst drop |
+|---|---|---|---|---|---|---|
+| SPY | $699 | **0.80** | 34% | 19.4% | **1.23** | 19% |
+| momentum 12-1 (live paper) | **$1,535** | 0.69 | 60% | **37.7%** | 0.87 | 57% |
+| target 25% only | $1,402 | 0.67 | 58% | 30.6% | 0.78 | 53% |
+| target 30% only | $1,487 | 0.68 | 57% | 32.4% | 0.80 | 55% |
+| target adaptive (25/30) | $1,377 | 0.67 | 57% | 30.9% | 0.78 | 54% |
+| stop 10% only | $1,112 | 0.63 | 63% | 30.5% | 0.79 | 56% |
+| stop 10% + target 25/30/adaptive | $1,048–1,129 | 0.62–0.64 | 60–61% | 27.5–29.6% | 0.75–0.79 | 50–53% |
+| stop 15% only | $1,389 | 0.68 | 63% | 35.6% | 0.86 | 53% |
+| stop 15% + target 25/30/adaptive | $1,287–1,345 | 0.67–0.68 | 57% | 29.6–29.9% | 0.78–0.79 | 48–51% |
+
+- **No variant beats plain momentum or SPY on Sharpe in either window, and every worst drop is 48–63%.** FAIL.
+- **Stops** sell at the bottom of short dips that momentum stocks often recover from. With a weekly check, a
+  "10% stop" often fills at −15% or worse. A 10% stop cost about $400 of the final $1,535.
+- **Targets** cut the big winners that carry momentum (2025: +74% plain vs +60–97% with targets, but 2024: +59% vs
+  +38–48%). They also double or triple the trade count.
+- **Control check:** the R6 code with no stop and no target ends at $1,595 (2,545 trades) vs momentum's $1,535
+  (2,535). The small gap is one difference: R6 skips a stock with no price that day. The control is slightly
+  *better* than plain momentum, so every variant also loses to its own control.
+- **Verdict:** don't add stops or profit targets. Monthly momentum stays as it is on the paper account.

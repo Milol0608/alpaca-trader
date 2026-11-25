@@ -143,3 +143,82 @@ def momentum_crash_filter(etfs: set[str], n: int = 20, lookback: int = 252, skip
             return mom(w)
         return {hedge: 1.0} if hedge and hedge in w.index and not np.isnan(w.close[-1, w.index[hedge]]) else {}
     return strat
+
+
+def momentum_stops(etfs: set[str], stop: float | None, target: float | str | None, n: int = 20, lookback: int = 252,
+                   skip: int = 21, vol_days: int = 60):
+    """R6 (docs/RESEARCH.md): momentum 12-1 top n, re-ranked monthly; each week a holding is sold if it is down
+    `stop` or up `target` from its entry close, and the money goes to the best-ranked stock not held and not sold
+    this month. target="adaptive": 30% for picks with above-median 60-day volatility, 25% for the rest.
+    Weights drift with prices between decisions (no mid-month re-equal-weighting)."""
+    st: dict = {"units": {}, "entry": {}, "tgt": {}, "banned": set(), "med_vol": None}
+
+    def vols(c: np.ndarray) -> np.ndarray:
+        with np.errstate(invalid="ignore", divide="ignore"):
+            r = np.diff(np.log(c[-vol_days - 1:]), axis=0)
+        return np.nanstd(r, axis=0)
+
+    def last_px(w: Window, s: str) -> float:
+        col = w.close[-10:, w.index[s]]
+        ok = col[~np.isnan(col)]
+        return float(ok[-1]) if len(ok) else float("nan")
+
+    def tgt_for(v: float) -> float | None:
+        if target == "adaptive":
+            return 0.30 if v > st["med_vol"] else 0.25
+        return target
+
+    def ranked(w: Window) -> tuple[list[str], np.ndarray, np.ndarray]:
+        names, cols = _cols(w, w.allowed - etfs)
+        c = w.close[:, cols]
+        score = c[-1 - skip] / c[-1 - lookback] - 1
+        ok = ~np.isnan(score) & ~np.isnan(c[-1])
+        idx = np.nonzero(ok)[0]
+        order = idx[np.argsort(-score[idx], kind="stable")]
+        return [names[k] for k in order], vols(c)[order], c[-1][order]
+
+    def strat(w: Window):
+        if len(w.days) <= lookback:
+            return None
+        if _first_day_of_month(w):
+            names, v, px = ranked(w)
+            pick = list(range(min(n, len(names))))
+            if not pick:
+                st["units"] = {}
+                return {}
+            st["med_vol"] = float(np.nanmedian(v[pick]))
+            st["banned"] = set()
+            st["units"] = {names[k]: (1.0 / len(pick)) / px[k] for k in pick}
+            st["entry"] = {names[k]: px[k] for k in pick}
+            st["tgt"] = {names[k]: tgt_for(v[k]) for k in pick}
+            return {s: 1.0 / len(pick) for s in st["units"]}
+        if not _first_day_of_week(w) or not st["units"]:
+            return None
+        now = {s: last_px(w, s) for s in st["units"]}
+        out = []
+        for s, p in now.items():
+            if np.isnan(p):
+                continue
+            r = p / st["entry"][s] - 1
+            t = st["tgt"][s]
+            if (stop is not None and r <= -stop) or (t is not None and r >= t):
+                out.append(s)
+        if not out:
+            return None
+        val = {s: st["units"][s] * now[s] for s in st["units"] if not np.isnan(now[s])}
+        names, v, px = ranked(w)
+        cands = [(names[k], v[k], px[k]) for k in range(len(names))
+                 if names[k] not in st["units"] and names[k] not in st["banned"]]
+        for s in out:
+            st["banned"].add(s)
+            amt = val.pop(s)
+            del st["units"][s], st["entry"][s], st["tgt"][s]
+            if cands:
+                name, vv, p = cands.pop(0)
+                st["units"][name] = amt / p
+                st["entry"][name] = p
+                st["tgt"][name] = tgt_for(vv)
+                val[name] = amt
+        tot = sum(val.values())
+        return {s: x / tot for s, x in val.items()} if tot > 0 else {}
+    return strat
