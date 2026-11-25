@@ -570,3 +570,35 @@ Run with `uv run python -m trader.backtest.s2`. Train Mar 2017 – Dec 2022, tes
 - **Fills, bar:** same as K2. Conservative fills, ¢ > 0 with the 95% CI over city-days above zero, Jul–Nov > 0,
   ≥ 100 fills. **Plus the S1 held-out check:** the Aug–Nov edge must also be > 0.
 - **Also reported:** the overlap with the 8pm rule (markets both would buy), and 8am + 8pm together.
+
+## K6 result: B1 at 8am: **FAIL**
+Run with `uv run python -m app.backtest.morning` (Trading-bot). 644 extra tapes downloaded; no market lacked one.
+
+| rule | posted | filled | ¢/fill | 95% CI | Jul–Nov | Aug–Nov |
+|---|---|---|---|---|---|---|
+| **8am B1** | 956 | 868 (91%) | +2.21 | [−0.80, +5.00] | +2.94 | +1.90 |
+| 8pm B1 (K2, same code) | 419 | 374 (89%) | **+7.09** | [+2.69, +11.25] | +5.40 | +5.06 |
+| 8am, markets not also picked at 8pm | 669 | 620 | +0.62 | [−3.15, +4.03] | +2.01 | +0.82 |
+
+- The CI includes zero. **FAIL.** By 8am, forecasts and prices are better informed and most of the favourite
+  discount is gone. The new markets 8am adds (not favourites at 8pm) earn about nothing.
+- The 8pm rule reproduces K2 exactly in this code, so the scorer is consistent.
+
+## B1 capacity: profit peaks at ~50 contracts per bid (measured 2026-11-24)
+Order size N per bid; we get min(N, 25% of the contracts that traded through our bid). From K2's 374 fills:
+
+| N | $/month (Mar–Nov) | ¢ per contract | $/month (Aug–Nov) | avg $ at risk per bid |
+|---|---|---|---|---|
+| 1 | $2.84 | +6.9 | $3.06 | $0.69 |
+| 10 | $23.44 | +6.0 | $23.67 | $6.63 |
+| 20 | $39.48 | +5.2 | $35.46 | $12.80 |
+| **50** | **$61.63** | +3.5 | **$40.61** | $29.65 |
+| 100 | $61.72 | +1.9 | $2.98 | $54.33 |
+| 250 | −$151.82 | −2.3 | −$473.09 | $113.36 |
+
+- **Why:** favourites that few contracts trade through win 93–96% of the time (+22–25¢). Those that thousands
+  trade through are collapsing and win 39–67% (−3 to −34¢). Volume isn't known in advance, but a big order fills
+  fully on the collapses and only partly on the winners.
+- **So B1 is worth about $40–60 a month at most, whatever the bankroll.** About $300–500 of Kalshi bankroll is
+  enough to reach that. Bigger bankrolls don't earn more from B1. Kelly sizing is fine while it stays under ~20
+  contracts per bid.
