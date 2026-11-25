@@ -834,3 +834,14 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   - 70/30 SPY / D2c: 2023+ Sharpe 1.14 (ridge) and 1.12 (trees), drops 24–25%; still under SPY's 1.23 / 19%.
 - Attention helps a little on 2023+ (Sharpe +0.05 to +0.07 over D2a, the second part of the bar is met) but nowhere
   near SPY, and the 2019–22 trees version got worse. Not a usable edge. Stock "deciders" are closed for now.
+
+## F1. Forward paper test: B1 1 contract vs B1 ¼ Kelly vs D1c decider ¼ Kelly. Registered 2026-11-25, before running
+- **Why:** the owner wants the D1c decider (failed D1's bar, but most backtest dollars) tested live against B1 at
+  ¼ Kelly and B1 as it runs. ADR 0007 in kalshi-forecaster; three maker arms on the same live markets.
+- **Arms:** `B1-fav-bid` (1 contract), `B1-kelly` (edge 3.42¢), `D1c-kelly` (frozen model, θ = 2¢, favourites buy YES
+  at the bid, longshots buy NO at 1 − ask). Kelly arms start with $100 each; sizing and fill rules as in D1's money().
+- **Review:** 2027-02-25 (3 months), or earlier only to stop an arm whose bankroll falls 30% from its peak.
+- **D1c beats B1-kelly** only if, at review: D1c's settled ¢/contract > 0 with the event-bootstrap 95% CI above zero,
+  **and** its bankroll is above B1-kelly's, **and** its worst drop is under 30%. Otherwise B1 stays the rule.
+- **¼ Kelly replaces 1 contract for B1** only if B1-kelly's ¢/contract > 0 and worst drop < 25%, with ≥ 100 settled
+  fills. Same model, same thresholds for the whole test: no refits, no tuning.

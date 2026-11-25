@@ -27,11 +27,12 @@ and should say what they change against this list.
 | Kalshi hosting | GitHub Actions, hourly, triggered by cron-job.org; Neon Postgres. Paper/shadow only; live trading locked. |
 | Kalshi taker bot | `nbm-blend-v1` (NBM forecast blended with the market) on daily-high markets, $100 paper bankroll, ¼ Kelly, ≤5% per market, ≤10% per city-day, ≤25% open, 3¢ minimum edge, 30% kill switch. Rarely finds a trade. |
 | Kalshi maker bot | **B1** (K2): at 8pm local standard time the evening before, a 1-contract buy-YES at the best bid on daily-high buckets priced 65–95¢; fills checked against the real trade tape; held to settlement. ADR 0006. |
+| Kalshi maker arms (v1.1, 2026-11-25) | ADR 0007: B1 also at ¼ Kelly, and the D1c decider (frozen trees + GFS/ECMWF) at ¼ Kelly, each on its own $100 paper bankroll. Pre-registered as F1; review 2027-02-25. |
 | Kalshi settlement/report | Settles from any recorded result; report lists open positions and the B1 maker section. |
 | Alpaca bot | Momentum 12-1, top 20 of the 500 most-traded US stocks (> $5, ETFs excluded), equal weight, rebalanced on the first run of each month, weekdays 10:00 New York. $200 paper account. No stops or targets. |
 | Research | Pre-registered tests K1–K8, R1–R7, C1, S1–S2 in docs/RESEARCH.md. Survivors: B1 only (Kalshi). Nothing beats SPY risk-adjusted on stocks. |
 
-**Pending owner decisions at v1:** B1 at ¼ Kelly instead of 1 contract; 70/30 SPY/momentum as a second paper
+**Pending owner decisions at v1:** ~~B1 at ¼ Kelly instead of 1 contract~~ (now tested forward as F1, 2026-11-25); 70/30 SPY/momentum as a second paper
 strategy; V1 gap logger (unmerged branch); K7/K8 screens in progress (results go to v1.x).
 
 ## Owner decisions (2026-11-24)
