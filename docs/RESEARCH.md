@@ -892,7 +892,7 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
 - **Overfitting controls:**
   - every variant listed here is run and reported;
   - each grid is judged by its **median** variant and the share that pass;
-  - a deflated Sharpe ratio (Bailey & López de Prado 2014) is given for the best of all 42 stock variants;
+  - a deflated Sharpe ratio (Bailey & López de Prado 2014) is given for the best of all 54 stock variants (36 + 12 + 6);
   - only a forward paper test can adopt anything.
 - **Common:** $200, 5 bps per side, trade at the next open, BIL as the cash asset; SPY buy-and-hold is the benchmark.
   Train 2017-03 → 2022-12, test 2023-01 → now. **Bar (ADR 0003), in both periods:** CAGR ≥ SPY + 3 pts,
