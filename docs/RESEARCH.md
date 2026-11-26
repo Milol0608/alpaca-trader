@@ -1013,3 +1013,42 @@ test CAGR ≥ 22.4%, Sharpe ≥ **1.11**, drop < 40%. SPY: train 10.1% / 0.59 / 
 - **Review after 12 months.** It "earns a place" if it is ahead of SPY over the year and its worst drop is < 40%.
   It's stopped early if it falls 30% from its peak.
 - Honest limit, stated now: one year of stock returns cannot prove skill; this checks that it runs as simulated.
+
+## G5 result: year-by-year tournament: **5 of 21 versions pass A (profit-first, 40% cap); 1 passes C**
+Run with `uv run python -m trader.backtest.g5_tournament`. Each year applied to $200, untouched, all reinvested.
+
+| version | median year | beats SPY | worst year | worst drop in a year | $200 from Mar 2017 | $200 from Jan 2018 | A | B | C |
+|---|---|---|---|---|---|---|---|---|---|
+| 8a crypto trend 100% | 62% | 6/10 | −30% | 48% | $128,083 | $5,162 | Y | Y | n |
+| **8b 25% crypto trend + 75% SPY** | 36% | 8/10 | −18% | 36% | $3,692 | $1,230 | Y | Y | **Y** |
+| 3c vol target 30% cap 3 | 35% | 6/10 | −33% | 38% | $1,271 | $881 | Y | Y | n |
+| **4b 50% mom + sleeve 25%** | 31% | 8/10 | −21% | 38% | $1,499 | $1,271 | Y | Y | n |
+| 3b vol target 25% cap 3 | 30% | 6/10 | −28% | 36% | $1,010 | $708 | Y | Y | n |
+| 2c 3× S&P trend MA150 | 33% | 6/10 | −51% | 52% | $1,183 | $843 | n | Y | n |
+| 5a 55 UPRO / 45 TMF | 25% | 6/10 | −64% | 67% | $651 | $491 | n | Y | n |
+| 4a G4 (F2 version) | 26% | 5/10 | −16% | 27% | $996 | $823 | n | n | n |
+| momentum top 10 | 10% | 5/10 | −23% | 57% | $2,426 | $2,389 | n | n | n |
+| rotation top 1 3× | −12% | 4/10 | −56% | 80% | $95 | $58 | n | n | n |
+| SPY (reference) | 18% | — | −18% | 34% | $699 | $615 | | | |
+
+Other versions (all fail A): momentum top 20 and top 20 liquid, 2× and 3× trend MA200, vol 20%, 60 SSO / 40 TLT,
+UPRO/TMF with bond filter, rotation top 1/top 2 2×, 52-week-high (both). References: UPRO buy-hold median 36% but
+−57% in 2022; TQQQ buy-hold −79% (hindsight); BTC buy-hold −75%.
+
+- **Walk-forward chooser:** it picked "crypto trend 100%" every January, because 2017 dominated every past record.
+  Its blind years: median 48%, beat SPY 5 of 9, worst −30%, $200 → $5,162 from 2018. A chooser chases the most
+  volatile past winner.
+- **Blend of the 8 families:** median 36%, beats SPY 7/10, worst −26% → passes A and B; $1,079 from 2018.
+- **Sensitivity (disclosed, not re-judged), crypto checked weekly instead of daily (the old C1 timing):**
+  - 8a falls to $54,058, with a −44% year (fails A).
+  - 8b stays a pass on A and B (median 31%, 7/10, worst −21%), but its 2023+ CAGR drops to 20.1% and it fails C.
+  - The original C1 test used weekly checks; that explains its lower 2023+ result ($356).
+  - Crypto results are fragile to one implementation detail, which is a warning in itself.
+- **Caveats:**
+  - Medians are robust to the 2017 crypto bubble, but every dollar total that includes 2017 is not.
+  - All ten years are one long US bull market with no 2008.
+  - Leveraged ETFs lose value in choppy sideways markets, and 2015-style years aren't in the sample.
+  - No taxes.
+  - Leveraged bond mixes lost 35–64% in 2022, as predicted.
+- **Candidates for forward paper (both pre-registered here and passing A and B):** 8b and 4b. F2's version (4a)
+  did not pass A (beat SPY only 5 of 10 years). The owner decides which bar applies (ADR 0003 stands until then).

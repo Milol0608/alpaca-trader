@@ -207,6 +207,11 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
   fill mostly on losers). More Kalshi budget does not mean more profit.
 - **G2–G4 growth tests (ADR 0003 growth bar: CAGR ≥ SPY+3, Sharpe ≥ 0.9× SPY, drop < 40%): all FAIL** on test
   Sharpe. Leverage gives more money with bigger drops (G4: $200 → $1,218 vs SPY $699) but no better ratio.
+- **G5 year-by-year tournament (2026-11-25):** 21 versions × 10 calendar years. Under the profit-first bar (A: median
+  year ≥ SPY+5, beats SPY ≥ 6/10 years, no year < −40%), 5 pass. Most robust: **25% crypto trend + 75% SPY**
+  (median 36% vs SPY 18%, 8/10, worst −18%; also passes ADR 0003, but only with daily checks) and **50% momentum +
+  50% vol-targeted S&P** (median 31%, 8/10, worst −21%). **Pending owner decision:** which bar governs, and where
+  forward paper arms run.
 - **D1 Kalshi decider (trained model, with/without forecasts): FAIL.** With forecasts it made $26.51 vs B1's $13.20
   on Aug–Nov at 1 contract, but its 95% range includes zero. B1 stays. Could be shadow-logged.
 - **D2 stock decider: D2a (no news) FAIL**, worse than plain momentum. **D2b (GDELT news) not run:** GDELT blocked
