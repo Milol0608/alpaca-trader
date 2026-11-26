@@ -1,6 +1,6 @@
 # Project context: source of truth
 
-**Last updated: 2026-11-25 (K7–K13, D1/D2 deciders; nothing new passes).** This file is the single source of truth for both trading bots. Read the raw version
+**Last updated: 2026-11-25 (K7–K13, G1–G4, D1/D2 deciders; nothing new passes; growth bar ADR 0003).** This file is the single source of truth for both trading bots. Read the raw version
 before answering: https://raw.githubusercontent.com/Milol0608/alpaca-trader/main/docs/PROJECT_CONTEXT.md.
 If anything said in chat contradicts this file, the file wins until it's updated. Ideas discussed in chat are
 proposals until they're written here.
@@ -203,6 +203,10 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
   (−0.9¢). Gold, 15-min Bitcoin, index hourly, Polymarket US temperature and sports: fail or too few.
 - **K13 bucket-sum arbitrage (2026-11-25): FAIL.** Buying every bucket of a daily-high event costs ~$1.07–1.09
   (overround, narrowing); only 28 of 13,445 snapshots were +1¢ after fees (1 since Aug), none tape-confirmed. Closed.
+- **G1 B1 capacity (2026-11-25):** B1 is a small-account edge: ~$300–1,000. From $3k up it loses money (big orders
+  fill mostly on losers). More Kalshi budget does not mean more profit.
+- **G2–G4 growth tests (ADR 0003 growth bar: CAGR ≥ SPY+3, Sharpe ≥ 0.9× SPY, drop < 40%): all FAIL** on test
+  Sharpe. Leverage gives more money with bigger drops (G4: $200 → $1,218 vs SPY $699) but no better ratio.
 - **D1 Kalshi decider (trained model, with/without forecasts): FAIL.** With forecasts it made $26.51 vs B1's $13.20
   on Aug–Nov at 1 contract, but its 95% range includes zero. B1 stays. Could be shadow-logged.
 - **D2 stock decider: D2a (no news) FAIL**, worse than plain momentum. **D2b (GDELT news) not run:** GDELT blocked

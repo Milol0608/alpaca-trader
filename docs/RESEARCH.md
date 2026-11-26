@@ -919,3 +919,50 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   - G2 likely fails the 40% drop limit: trend filters whipsawed in 2018, 2020 and 2022 (see R2), and leverage
     multiplies that.
   - G3 and G4 have the best evidence, but a pass is far from certain.
+
+## G1 result: B1 capacity: **about $300–1,000; bigger bankrolls LOSE money (adverse selection)**
+Script: Trading-bot `app/backtest/g1_capacity.py`, on the 261 saved B1 fills of Aug–Nov 2026 (18 weeks).
+
+| start | ¼ Kelly end (return, worst drop) | ½ Kelly end (return, worst drop) |
+|---|---|---|
+| $100 | $140 (+40%, 10%) | $187 (+87%, 17%) |
+| $300 | $401 (+34%, 11%) | $446 (+49%, 18%) |
+| $1,000 | $1,119 (+12%, 16%) | $1,058 (+6%, 23%) |
+| $3,000 | $2,672 (−11%, 24%) | $2,063 (−31%, 40%) |
+| $10,000 | $5,971 (−40%, 43%) | $3,922 (−61%, 63%) |
+
+- Capacity by the registered rule (return ≥ half of $100's): **$300** for both sizes, with or without the 500 cap.
+- **Why it turns negative:** filled losers had a median **2,628** contracts trade through our price vs **557** for
+  winners. Fills with ≥ 1,000 through-volume win 54% of the time and average −15.7¢; with ≥ 4,000, 37% and −32.9¢.
+  When the favourite is about to lose, sellers swamp the bid and fill a big order completely. When it's about to win,
+  only a few contracts trade through. A small order fills either way; a big one is filled mostly on the losers.
+- **Conclusion:** B1 is a small-account edge. Adding budget beyond ~$1k does not add profit and, at ¼ Kelly, makes it
+  negative. (A per-order contract cap could be the fix, but that's a new rule and would need its own pre-registration.)
+
+## G2–G4 result: leveraged trend, volatility targeting, M70 + vol sleeve: **all FAIL (0 of 42 judged variants)**
+Script: `uv run python -m trader.backtest.g_growth`. Bar (ADR 0003): train CAGR ≥ 13.1%, Sharpe ≥ 0.53, drop < 40%;
+test CAGR ≥ 22.4%, Sharpe ≥ **1.11**, drop < 40%. SPY: train 10.1% / 0.59 / 34%; test 19.4% / 1.23 / 19%; $200 → $699.
+
+| grid (median variant) | train CAGR / Sharpe / drop | test CAGR / Sharpe / drop | share passing |
+|---|---|---|---|
+| G2 2× trend | 17.9% / 0.70 / 40% | 26.6% / 0.91 / 28% | 0% |
+| G2 3× trend | 23.0% / 0.69 / 55% | 34.9% / 0.87 / 41% | 0% |
+| G3 vol target | 9.9% / 0.60 / 27% | 16.7% / 0.97 / 19% | 0% |
+| G4 30% mom + vol sleeve | 13.3% / 0.68 / 29% | 25.2% / 1.02 / 27% | 0% |
+
+- **What fails is the test Sharpe.** 2023–26 was an unusually smooth bull market (SPY Sharpe 1.23); every leveraged
+  or timed version earned more but was bumpier, topping out at about 1.04–1.10.
+- **Closest:**
+  - **G4 30% momentum + vol 20% L20:** $200 → $1,218 (vs SPY $699); passes train (15.6% / 0.72 / 30%) and test
+    CAGR and drop (28.2%, 28%), but test Sharpe is 1.02.
+  - **G2 Nasdaq 2× MA150 weekly:** $200 → $2,664; train 28.2% / 0.92 / 34%, test 34.2% / 1.04 / 28%.
+  - Caveat on Nasdaq: that the Nasdaq-100 beat the S&P over 2017–26 is known with hindsight. Picking it now is
+    exactly the bias this program guards against.
+- **3× fails on drop** (median 55% in train): leverage 3× through 2018/2020/2022 is too much, as stated in the prior.
+- **Deflated Sharpe** for the best of the 42 judged variants (Nasdaq 2× MA150 weekly, Sharpe 0.97): probability 0.99
+  that its Sharpe is above zero after the number of trials. That says it's real return, **not** that it beats SPY's.
+  (The 12 1× variants and M70 were reference, not counted as trials.)
+- **Verdict:** nothing changes on the paper account. Leverage buys more money with deeper, longer drops, roughly at
+  SPY's risk-adjusted rate or a little worse; no rule tested turns it into a better ratio. If the owner wants the
+  higher-growth / higher-drop profile anyway, G4 (published method, no Nasdaq hindsight) is the one to register for
+  a forward paper test, with the bar written now. The bar is not to be moved again.
