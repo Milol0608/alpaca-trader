@@ -1,6 +1,6 @@
 # Project context: source of truth
 
-**Last updated: 2026-11-25 (K7–K12, D1/D2 deciders; nothing new passes).** This file is the single source of truth for both trading bots. Read the raw version
+**Last updated: 2026-11-25 (K7–K13, D1/D2 deciders; nothing new passes).** This file is the single source of truth for both trading bots. Read the raw version
 before answering: https://raw.githubusercontent.com/Milol0608/alpaca-trader/main/docs/PROJECT_CONTEXT.md.
 If anything said in chat contradicts this file, the file wins until it's updated. Ideas discussed in chat are
 proposals until they're written here.
@@ -201,6 +201,8 @@ that pauses rather than stops; market making with resting orders (0% maker fee);
 - **K7–K12 new markets (2026-11-25):** favourites are underpriced on Kalshi hourly temperature too (+8.2¢ on 8
   unseen cities, PASS), but resting bids lose (−5.0¢/fill, adverse selection) and buying at the ask loses after fee
   (−0.9¢). Gold, 15-min Bitcoin, index hourly, Polymarket US temperature and sports: fail or too few.
+- **K13 bucket-sum arbitrage (2026-11-25): FAIL.** Buying every bucket of a daily-high event costs ~$1.07–1.09
+  (overround, narrowing); only 28 of 13,445 snapshots were +1¢ after fees (1 since Aug), none tape-confirmed. Closed.
 - **D1 Kalshi decider (trained model, with/without forecasts): FAIL.** With forecasts it made $26.51 vs B1's $13.20
   on Aug–Nov at 1 contract, but its 95% range includes zero. B1 stays. Could be shadow-logged.
 - **D2 stock decider: D2a (no news) FAIL**, worse than plain momentum. **D2b (GDELT news) not run:** GDELT blocked
