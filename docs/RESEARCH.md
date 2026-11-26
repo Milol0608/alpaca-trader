@@ -966,3 +966,50 @@ test CAGR ≥ 22.4%, Sharpe ≥ **1.11**, drop < 40%. SPY: train 10.1% / 0.59 / 
   SPY's risk-adjusted rate or a little worse; no rule tested turns it into a better ratio. If the owner wants the
   higher-growth / higher-drop profile anyway, G4 (published method, no Nasdaq hindsight) is the one to register for
   a forward paper test, with the bar written now. The bar is not to be moved again.
+
+## G5. Year-by-year strategy tournament (profit-first). Registered 2026-11-25, before running
+- **Why:** the owner wants the most profit over a year of untouched money and accepts bumpier rides. Instead of one
+  train/test split, **every calendar year is its own test**: 2017 (from Mar), 2018–2025, 2026 to date (10 periods).
+- **Simulation:**
+  - Day by day with the existing engine: decide after the close, trade at the next open, all gains reinvested,
+    no deposits.
+  - Costs per side: 5 bps for ETF-only strategies, 10 bps for anything holding single stocks, 25 bps for anything
+    holding crypto.
+  - Liquidity: stock versions marked "liquid" pick only stocks whose 20-day average dollar volume is ≥ $20M.
+  - Yearly result = % change from the last close of the prior year (or the 2017-03-01 start) to the year's last
+    close, applied to $200. Worst drop within the year is reported too.
+- **Families and versions (all run, all reported):**
+  1. **Stock momentum 12-1:** top 10; top 20; top 20 liquid.
+  2. **Leveraged S&P trend** (MA weekly, BIL when off): 2× SSO MA200; 3× UPRO MA200; 3× UPRO MA150.
+  3. **Vol-targeted S&P, cap 3×:** target 20%, 25%, 30% (L20).
+  4. **Momentum + vol sleeve (G4 family):** 30% mom + 70% sleeve 16% (the F2 version); 50% mom + 50% sleeve 25%.
+  5. **Leveraged stocks + bonds, quarterly rebalance:** 55% UPRO / 45% TMF; 60% SSO / 40% TLT; 55% UPRO / 45% TMF
+     with TMF moved to BIL while TLT is under its 200-day average.
+  6. **Leveraged rotation, monthly, best 6-month return (BIL if negative):** top 1 of {SSO, QLD, UGL, UBT};
+     top 2 of the same; top 1 of {UPRO, TQQQ, TMF}.
+  7. **52-week-high stocks:** top 10 monthly; top 10 liquid monthly.
+  8. **Crypto trend (BTC+ETH 50/50, each above its ~140-calendar-day average, sampled on stock days):** 100%;
+     25% crypto trend + 75% SPY.
+- **References, not judged:** SPY, QQQ, UPRO buy-and-hold, TQQQ buy-and-hold, BTC buy-and-hold. QQQ/TQQQ/Nasdaq
+  results carry hindsight (Nasdaq is known to have won this decade).
+- **Overfitting controls:**
+  - every version reported, every year;
+  - a **walk-forward chooser** picks, each January, the version with the best compounded return over all prior
+    periods, and is scored only on the years it chose blind;
+  - an **equal-weight blend** of the 8 families' first versions, rebalanced each January.
+- **Judged three ways (owner's choice; the owner decides after seeing results; ADR 0003 stays unless they choose):**
+  - **A, profit-first with a 40% cap:** median year ≥ SPY's median + 5 pts, beats SPY in ≥ 6 of 10 years, no
+    calendar year below −40%.
+  - **B, profit-first, no cap:** the same without the loss limit.
+  - **C, ADR 0003:** CAGR ≥ SPY + 3 pts, Sharpe ≥ 0.9 × SPY's, drop < 40%, on 2017-03 → 2022 and on 2023 → now.
+- **Prior, stated now:**
+  - Leveraged bond mixes (family 5) should be crushed in 2022.
+  - Crypto and 3× have the biggest best years and the worst worst years.
+  - The chooser will likely chase last year's winner and lag.
+
+## F2. Forward paper test of G4 (30% momentum + 70% vol-targeted S&P sleeve, 16% target, L20, cap 2). Registered 2026-11-25
+- The middle G4 variant, not the best one (which would be cherry-picking). Runs on paper only, from $200, once the
+  owner chooses where it runs (a second Alpaca paper account, or replacing the momentum account).
+- **Review after 12 months.** It "earns a place" if it is ahead of SPY over the year and its worst drop is < 40%.
+  It's stopped early if it falls 30% from its peak.
+- Honest limit, stated now: one year of stock returns cannot prove skill; this checks that it runs as simulated.
