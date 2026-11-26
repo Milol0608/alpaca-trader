@@ -845,3 +845,26 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   **and** its bankroll is above B1-kelly's, **and** its worst drop is under 30%. Otherwise B1 stays the rule.
 - **¼ Kelly replaces 1 contract for B1** only if B1-kelly's ¢/contract > 0 and worst drop < 25%, with ≥ 100 settled
   fills. Same model, same thresholds for the whole test: no refits, no tuning.
+
+## K13. Bucket-sum mispricing on Kalshi daily highs. Registered 2026-11-25, before running
+- **Why:** each daily-high event is a set of buckets that cover every temperature; exactly one pays $1. Buying YES on
+  every bucket costs Σ ask and always pays $1; buying NO on every bucket costs Σ(1 − bid) and always pays n − 1.
+  If either costs less than it pays after fees, that is an arbitrage, not a forecast. The bucket sums have **not**
+  been looked at before this entry (only settlement sums, in K8).
+- **Overfitting:** the rule has no fitted parameters (threshold = "net of fees > 0"), so it is run once on all data.
+  The real risk runs the other way: hourly candle quotes can be stale and show no size, so a backtest overstates
+  arbitrage. Hence the tape check below, and a pass earns only a forward test on live order books.
+- **Data:** `prices.json` 8pm-eve and 8am quotes (last hourly candle close before each time) for `markets_kept`
+  daily highs. An event counts only if its buckets tile the whole line (one "less", one "greater", "between"
+  buckets contiguous, no gaps or overlaps) and every bucket has a quote from the **same candle time**.
+  A YES ask of 0 or ≥ $1 is "no offer"; a bid of 0 is "no bid"; a set with a missing leg can't be traded.
+- **Net per set:** buy-set = 1 − Σ askᵢ − Σ 0.07·askᵢ(1 − askᵢ); sell-set = Σ bidᵢ − 1 − Σ 0.07·bidᵢ(1 − bidᵢ)
+  (NO price 1 − bid has the same fee). Reported for 10-set lots (fee unrounded) and 1-set (each leg's fee rounded
+  up to a cent).
+- **Tape check ("confirmed"):** every leg must have a trade within ±60 min of the snapshot at a price at or better
+  than ours on our side (buy-set: a taker-YES trade at ≤ askᵢ; sell-set: a taker-NO trade at ≥ bidᵢ).
+- **Pass:** ≥ 30 confirmed 10-lot opportunities with net ≥ +1¢ per set, at least 10 in each half (before / from
+  2026-08-01). Then a money path: $100, 10 sets per confirmed opportunity (capped at cash), the first qualifying
+  snapshot per event only.
+- **Also reported, not judged:** the distribution of the overround (Σ ask − 1 and 1 − Σ bid) by half, and how many
+  unconfirmed opportunities there were. A fail closes the idea for these series; a pass means logging live books.
