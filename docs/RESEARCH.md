@@ -868,3 +868,19 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   snapshot per event only.
 - **Also reported, not judged:** the distribution of the overround (Σ ask − 1 and 1 − Σ bid) by half, and how many
   unconfirmed opportunities there were. A fail closes the idea for these series; a pass means logging live books.
+
+## K13 result: bucket-sum arbitrage on Kalshi daily highs: **FAIL (no real arbitrage)**
+- 13,445 snapshots (7,223 events, Oct 2025 – Nov 2026) where every bucket had a same-candle quote. Skipped:
+  ~2,900 per snapshot time with a missing quote, ~500–700 with quotes from different candles, 176 events that don't tile.
+- The set is normally **overpriced to the taker**: Σ ask − 1 median +9¢ before Aug, +7¢ from Aug (p10 +2–3¢). Buying
+  all buckets costs ~$1.07–1.09 for a $1 payout. Σ bid sits a little under $1 (median 1 − Σ bid = +2–4¢).
+- Net ≥ +1¢ after the taker fee (10-lot): **28 snapshots** in total, 25 before Aug and **1 from Aug**, at +1.0 to
+  +3.0¢ per set. With 1-set fee rounding (each leg's fee rounds up to a cent, ~6¢ per set) **none** is positive.
+- **Confirmed by the tape: 0.** Disclosed gap: only 33 of their 168 legs have trades in our cached tape (it was pulled
+  for other tests), so the tape check can't confirm most of them either way. The verdict doesn't depend on it: the
+  later half has 1 opportunity (bar: ≥ 10), and even counting every unconfirmed one at 10 sets the total would be
+  about **$4.93 over 14 months** before any stale-quote losses.
+- **Conclusion:** no free money in the bucket sums; the overround is Kalshi's version of the bookmaker's margin and
+  it has narrowed (9¢ → 7¢), which is good for B1 (cheaper favourites) but leaves no arbitrage. Not taking it forward.
+  (Σ bid > 1 in ~5–15% of snapshots hints at a maker-side "sell the set" idea, but that would be post-hoc and needs
+  every leg to fill, which K11 shows is where makers get picked off. Not pursued.)
