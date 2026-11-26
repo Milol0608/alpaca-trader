@@ -884,3 +884,38 @@ Run with `uv run python -m app.backtest.k9_index` (Trading-bot) on 1,000 events 
   it has narrowed (9¢ → 7¢), which is good for B1 (cheaper favourites) but leaves no arbitrage. Not taking it forward.
   (Σ bid > 1 in ~5–15% of snapshots hints at a maker-side "sell the set" idea, but that would be post-hoc and needs
   every leg to fill, which K11 shows is where makers get picked off. Not pursued.)
+
+## G-series: growth with controlled risk. Registered 2026-11-25, before running
+- **Why:** the owner wants faster growth with controlled risk (ADR 0003 sets the growth bar). The only way to earn
+  more than an asset with an edge is more exposure to it; for a cash account that means leveraged ETFs, timed by
+  rules whose settings come from published papers. Kalshi side: how far B1 scales with budget.
+- **Overfitting controls:**
+  - every variant listed here is run and reported;
+  - each grid is judged by its **median** variant and the share that pass;
+  - a deflated Sharpe ratio (Bailey & López de Prado 2014) is given for the best of all 42 stock variants;
+  - only a forward paper test can adopt anything.
+- **Common:** $200, 5 bps per side, trade at the next open, BIL as the cash asset; SPY buy-and-hold is the benchmark.
+  Train 2017-03 → 2022-12, test 2023-01 → now. **Bar (ADR 0003), in both periods:** CAGR ≥ SPY + 3 pts,
+  Sharpe ≥ 0.9 × SPY's, worst drop < 40%. **A grid passes** if its median variant passes **and** ≥ 2/3 of its
+  variants do.
+- **G1: B1 capacity (Kalshi, measurement, no pass/fail).**
+  - Data: the saved Aug–Nov 2026 B1 fills, which include each order's through-volume.
+  - Run the D1/S1 money rule at bankrolls $100, $300, $1k, $3k, $10k, $30k, at ¼ and ½ Kelly (edge 3.42¢), each
+    with and without the 500-contract cap. Fills are capped at 25% of through-volume.
+  - Capacity = the largest bankroll whose % return is at least half of the $100 % return.
+  - Caveat: at size our own orders would change the queue, so this is an upper bound.
+- **G2: leveraged trend** (Gayed & Bilello 2016, "Leverage for the Long Run"; the rule predates our data).
+  - Rule: hold the index fund when its unleveraged index closes above its N-day average, else BIL.
+  - Grid: index {S&P: SPY/SSO/UPRO, Nasdaq-100: QQQ/QLD/TQQQ} × leverage {1, 2, 3} × N {150, 200, 250} ×
+    check {daily, weekly} = 36 variants.
+  - Judged as two grids, 2× and 3× (12 variants each); the 1× variants are reference only.
+- **G3: volatility-targeted S&P exposure** (Moreira & Muir 2017; Harvey et al. 2018).
+  - Weekly exposure E = min(cap, target / realised vol of SPY over L days), built from SPY/SSO/UPRO with BIL.
+  - Grid: target {12, 16, 20}% × L {20, 60} × cap {2, 3} = 12 variants.
+- **G4: the M70 near-miss with a vol-targeted S&P sleeve.**
+  - 30% momentum 12-1 (top 20, picks refreshed monthly) + 70% G3 sleeve (cap 2), rebalanced weekly.
+  - Grid: target {12, 16, 20}% × L {20, 60} = 6 variants. Plain M70 is shown as reference, not judged.
+- **Prior, stated now:**
+  - G2 likely fails the 40% drop limit: trend filters whipsawed in 2018, 2020 and 2022 (see R2), and leverage
+    multiplies that.
+  - G3 and G4 have the best evidence, but a pass is far from certain.
